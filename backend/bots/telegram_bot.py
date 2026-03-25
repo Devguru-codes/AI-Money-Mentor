@@ -52,27 +52,15 @@ AGENT_PROMPTS = {
     "dhansarthi": """You are DhanSarthi, the intelligent coordinator of AI Money Mentor.
 You coordinate 8 specialist agents and route financial queries to the right one.
 
-🧭 Available Agents (8 Specialists):
-| Agent | Role | Handles |
-|-------|------|---------|
-| Niveshak | Portfolio Analyst | Mutual funds, XIRR, CAS, SIP |
-| KarVid | Tax Wizard | Tax calculations, regime comparison |
-| Yojana | FIRE Planner | Retirement, corpus, goal planning |
-| Bazaar | Market Research | Stock prices, NSE/BSE, trends |
-| Dhan | Financial Health | Health score, savings ratio |
-| Vidhi | Compliance Expert | SEBI rules, finance law |
-| JeevanSarthi | Life Event Advisor | Marriage, children, education, home purchase |
-| CoupleSathi | Couple Planner | Joint finances, expense splits, shared goals |
-
-Routing guide:
-- Tax questions → KarVid
-- Stock prices → Bazaar  
-- Retirement/FIRE → Yojana
-- Mutual funds → Niveshak
-- Health score → Dhan
-- SEBI/law → Vidhi
-- Life events (marriage, kids, home) → JeevanSarthi
-- Couple finances → CoupleSathi
+Available Agents (8 Specialists):
+- Niveshak: Portfolio Analyst (MF, XIRR, CAS, SIP)
+- KarVid: Tax Wizard (tax calculations, regime comparison)
+- Yojana: FIRE Planner (retirement, corpus, goal planning)
+- Bazaar: Market Research (stock prices, NSE/BSE, trends)
+- Dhan: Financial Health (health score, savings ratio)
+- Vidhi: Compliance Expert (SEBI rules, finance law)
+- JeevanSarthi: Life Event Advisor (marriage, children, education, home)
+- CoupleSathi: Couple Planner (joint finances, expense splits, shared goals)
 
 Be helpful, friendly, and knowledgeable about Indian finance.""",
 
@@ -86,24 +74,24 @@ Be conversational and help users save taxes legally.""",
 You help users analyze their mutual fund portfolios, calculate XIRR, and understand risk metrics.
 You can parse CAS statements and provide portfolio recommendations.
 Explain Sharpe ratio, Sortino ratio, and CAGR in simple terms.
-Always include SEBI disclaimer when suggesting investments."",
+Always include SEBI disclaimer when suggesting investments.""",
 
     "yojana": """You are YojanaKarta, the FIRE Planner.
 You help users plan their financial independence and early retirement.
 Calculate FIRE numbers, suggest SIP strategies, and create retirement roadmaps.
 Explain the 4% rule and how compounding works.
-Be encouraging and help users set realistic goals."",
+Be encouraging and help users set realistic goals.""",
 
     "bazaar": """You are BazaarGuru, the Market Researcher.
 You provide stock prices, market analysis, and company information for NSE/BSE stocks.
 Explain technical indicators and market trends in simple terms.
 Always include SEBI disclaimer - this is NOT investment advice.
-Be informative but cautious about making predictions."",
+Be informative but cautious about making predictions.""",
 
     "dhan": """You are DhanRaksha, the Financial Health Expert.
 You assess users financial health based on 8 factors: emergency fund, savings rate, debt-to-income, etc.
 Provide personalized recommendations to improve financial health.
-Be supportive and help users build better financial habits."",
+Be supportive and help users build better financial habits.""",
 
     "vidhi": """You are Vidhi, the Legal and Compliance Expert.
 You help users understand SEBI regulations, mutual fund disclaimers, and investor rights.
@@ -116,7 +104,7 @@ Calculate future costs adjusted for inflation, suggest SIP amounts, and create c
 Be encouraging and help users achieve their life goals step by step.
 Always include SEBI disclaimer when giving financial advice.""",
 
-    "coupleplanner": """You are CoupleSathi, the Couple's Money Planner.
+    "coupleplanner": """You are CoupleSathi, the Couple Money Planner.
 You help couples plan joint finances, split expenses proportionally, and achieve shared goals together.
 Explain the 50/30/20 budget rule, plan debt payoff strategies, and suggest fair contribution splits.
 Be supportive of both partners and help build financial harmony in relationships.
@@ -180,22 +168,18 @@ def call_backend_api(endpoint: str, data: Dict[str, Any]) -> Optional[Dict]:
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE, agent: str):
     """Handle incoming message with AI response"""
     user_message = update.message.text
-    
-    # Get agent prompt
     prompt = AGENT_PROMPTS.get(agent, AGENT_PROMPTS["dhansarthi"])
     
-    # Call OpenAI
-    ai_response = call_openai(prompt, user_message)
+    # Get AI response
+    response = call_openai(prompt, user_message)
     
-    # Send response
-    await update.message.reply_text(ai_response)
+    await update.message.reply_text(response)
 
 
-def create_bot(token: str, agent: str) -> Application:
+def create_bot(token: str, agent: str):
     """Create a Telegram bot for a specific agent"""
     app = Application.builder().token(token).build()
     
-    # Add handlers
     app.add_handler(CommandHandler("start", lambda u, c: handle_start(u, c, agent)))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, lambda u, c: handle_message(u, c, agent)))
     
@@ -217,12 +201,13 @@ async def handle_start(update: Update, context: ContextTypes.DEFAULT_TYPE, agent
     }
     
     name = agent_names.get(agent, "AI Money Mentor")
-    await update.message.reply_text(
-        f"👋 Welcome to {name}!\n\n"
+    welcome_text = (
+        f"Welcome to {name}!\n\n"
         f"I am your AI financial assistant. Ask me anything about:\n"
-        f"• Tax planning\n• Mutual funds\n• FIRE planning\n• Stock prices\n• Financial health\n\n"
+        f"- Tax planning\n- Mutual funds\n- FIRE planning\n- Stock prices\n- Financial health\n\n"
         f"How can I help you today?"
     )
+    await update.message.reply_text(welcome_text)
 
 
 if __name__ == "__main__":

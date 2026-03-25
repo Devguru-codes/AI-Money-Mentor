@@ -85,7 +85,7 @@ export default function LifeEventPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Life Event</Label>
-              <Select value={eventType} onValueChange={setEventType}>
+              <Select value={eventType} onValueChange={(v) => v && setEventType(v)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

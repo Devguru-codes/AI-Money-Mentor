@@ -1,0 +1,167 @@
+"use client"
+
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { Loader2, User, Mail, Phone, MessageCircle } from "lucide-react"
+import { toast } from "sonner"
+
+export default function LoginPage() {
+  const router = useRouter()
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login")
+  const [method, setMethod] = useState<"telegram" | "email">("telegram")
+  const [telegramId, setTelegramId] = useState("")
+  const [email, setEmail] = useState("")
+  const [name, setName] = useState("")
+  const [phone, setPhone] = useState("")
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (method === "telegram" && !telegramId.trim()) {
+      toast.error("Please enter your Telegram ID")
+      return
+    }
+    if (method === "email" && !email.trim()) {
+      toast.error("Please enter your email")
+      return
+    }
+    if (authMode === "signup" && method === "email" && !name.trim()) {
+      toast.error("Please enter your name")
+      return
+    }
+    
+    setLoading(true)
+    try {
+      const userId = method === "telegram" ? telegramId : email
+      const user = { 
+        id: userId, 
+        telegramId: method === "telegram" ? telegramId : undefined,
+        email: method === "email" ? email : undefined,
+        name: name || (method === "telegram" ? `User_${telegramId.slice(-4)}` : email.split("@")[0]),
+        phone: method === "email" ? phone : undefined,
+        createdAt: new Date().toISOString()
+      }
+      localStorage.setItem("user", JSON.stringify(user))
+      localStorage.setItem("isLoggedIn", "true")
+      toast.success(authMode === "login" ? "Welcome back!" : "Account created successfully!")
+      setTimeout(() => router.push("/"), 500)
+    } catch (error) {
+      toast.error("Authentication failed. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-[80vh] flex items-center justify-center">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-4 w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+            <span className="text-2xl">💰</span>
+          </div>
+          <CardTitle className="text-2xl">AI Money Mentor</CardTitle>
+          <CardDescription>Your personal finance guide</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Auth Mode Toggle */}
+          <div className="flex bg-muted rounded-lg p-1">
+            <button 
+              className={"flex-1 py-2 text-sm font-medium rounded-md transition-colors " + (authMode === "login" ? "bg-background shadow" : "")} 
+              onClick={() => setAuthMode("login")}
+            >
+              Login
+            </button>
+            <button 
+              className={"flex-1 py-2 text-sm font-medium rounded-md transition-colors " + (authMode === "signup" ? "bg-background shadow" : "")} 
+              onClick={() => setAuthMode("signup")}
+            >
+              Sign Up
+            </button>
+          </div>
+
+          {/* Method Toggle */}
+          <div className="flex bg-muted rounded-lg p-1">
+            <button 
+              className={"flex-1 py-2 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-2 " + (method === "telegram" ? "bg-background shadow" : "")} 
+              onClick={() => setMethod("telegram")}
+            >
+              <MessageCircle className="w-4 h-4" />
+              Telegram
+            </button>
+            <button 
+              className={"flex-1 py-2 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-2 " + (method === "email" ? "bg-background shadow" : "")} 
+              onClick={() => setMethod("email")}
+            >
+              <Mail className="w-4 h-4" />
+              Email
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {authMode === "signup" && (
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input id="name" type="text" placeholder="Your full name" value={name} onChange={(e) => setName(e.target.value)} required />
+              </div>
+            )}
+
+            {method === "telegram" ? (
+              <div className="space-y-2">
+                <Label htmlFor="telegram">Telegram ID</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input id="telegram" type="text" placeholder="Enter your Telegram ID" value={telegramId} onChange={(e) => setTelegramId(e.target.value)} className="pl-10" required />
+                </div>
+                <p className="text-xs text-muted-foreground">Find your Telegram ID by messaging @userinfobot on Telegram</p>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input id="email" type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required />
+                  </div>
+                </div>
+                {authMode === "signup" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone (Optional)</Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input id="phone" type="tel" placeholder="+91 XXXXXXXXXX" value={phone} onChange={(e) => setPhone(e.target.value)} className="pl-10" />
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {authMode === "login" ? "Logging in..." : "Creating account..."}
+                </>
+              ) : (
+                authMode === "login" ? "Login" : "Create Account"
+              )}
+            </Button>
+          </form>
+          
+          <div className="text-center text-sm text-muted-foreground">
+            By continuing, you agree to our Terms of Service and Privacy Policy.
+          </div>
+          
+          <div className="text-center">
+            <Link href="/" className="text-sm text-primary hover:underline">← Back to Home</Link>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}

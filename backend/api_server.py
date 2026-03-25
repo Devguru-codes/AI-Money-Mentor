@@ -114,20 +114,73 @@ async def compare_tax_regimes(request: Dict[str, Any]):
 @app.post("/karvid/80c")
 async def calculate_80c(request: Dict[str, Any]):
     """Calculate 80C deductions"""
-    allowed_keys = ["ppf", "elss", "lic", "nps", "tuition_fees", "home_loan_principal"]
-    deductions = {k: v for k, v in request.items() if k in allowed_keys}
+    # Remap shorthand keys to actual function parameter names
+    param_map = {
+        "ppf": "ppf", "elss": "elss", "nps": "nps_tier1",
+        "lic": "life_insurance_premium",
+        "tuition_fees": "tuition_fees",
+        "home_loan_principal": "home_loan_principal",
+        "nsc": "nsc", "ssy": "ssy", "scss": "scss",
+        "tax_saving_fd": "tax_saving_fd", "ulip": "ulip",
+        "stamp_duty": "stamp_duty",
+        "life_insurance_premium": "life_insurance_premium"
+    }
+    deductions = {}
+    for k, v in request.items():
+        if k in param_map:
+            deductions[param_map[k]] = v
     result = calculate_80c_deduction(**deductions)
     return result
 
 @app.post("/karvid/capital-gains")
 async def calculate_capital_gains(request: Dict[str, Any]):
     """Calculate capital gains tax"""
-    gain = request.get("gain", 0)
     holding_period = request.get("holding_period", "long")
+    
     if holding_period == "long":
-        result = calculate_equity_ltcg(gain)
+        # calculate_equity_ltcg needs sale_price, purchase_price, days_held
+        sale_price = request.get("sale_price", 0)
+        purchase_price = request.get("purchase_price", 0)
+        days_held = request.get("days_held", 365)
+        gain = request.get("gain", sale_price - purchase_price)
+        
+        if sale_price > 0 and purchase_price > 0:
+            try:
+                cg_result = calculate_equity_ltcg(sale_price, purchase_price, days_held)
+                result = {
+                    "gain": cg_result.gain,
+                    "tax": cg_result.tax,
+                    "holding_period": "long",
+                    "exemption": getattr(cg_result, 'exemption', 125000),
+                    "rate": "12.5%"
+                }
+            except Exception as e:
+                # Fallback: simplified LTCG
+                exempt = min(gain, 125000)
+                taxable = max(0, gain - exempt)
+                result = {
+                    "gain": gain,
+                    "tax": taxable * 0.125,
+                    "holding_period": "long",
+                    "exemption": exempt,
+                    "rate": "12.5%",
+                    "note": f"Simplified: {str(e)}"
+                }
+        else:
+            # Only gain provided: simplified LTCG calc
+            exempt = min(gain, 125000)
+            taxable = max(0, gain - exempt)
+            result = {
+                "gain": gain,
+                "tax": taxable * 0.125,
+                "holding_period": "long",
+                "exemption": exempt,
+                "rate": "12.5%"
+            }
     else:
-        result = {"tax": gain * 0.15, "holding_period": "short"}  # STCG on equity is 15%
+        gain = request.get("gain", 0)
+        result = {"gain": gain, "tax": gain * 0.15, "holding_period": "short", "rate": "15%"}
+    
     return result
 
 # ============ YOJANAKARTA (FIRE Planner) ============

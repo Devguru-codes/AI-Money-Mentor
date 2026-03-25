@@ -18,6 +18,8 @@ class AgentType(Enum):
     BAZAAR_GURU = "bazaar"      # Market Research
     DHAN_RAKSHA = "dhan"        # Financial Health
     VIDHI = "vidhi"             # Legal/Compliance
+    LIFE_EVENT = "life-event"   # Life Event Planner
+    COUPLE_PLANNER = "couple-planner"  # Couple Finance
 
 
 @dataclass
@@ -177,6 +179,40 @@ class DhanSarthiCoordinator:
             confidence_threshold=0.5,
             api_endpoint="/vidhi/disclaimers"
         ),
+        AgentType.LIFE_EVENT: AgentCapability(
+            name="Life Event Advisor",
+            agent_type=AgentType.LIFE_EVENT,
+            description="Life Event Planner - Marriage, child birth, education, home buying financial planning",
+            keywords=["marriage", "wedding", "married", "baby", "child", "birth", "education", 
+                     "college", "school", "home buy", "house", "property", "life event",
+                     "marriage planning", "child birth", "higher education", "getting married",
+                     "new born", "kid", "university", "abroad", "study"],
+            example_queries=[
+                "I am getting married next year",
+                "Plan finances for having a baby",
+                "How much to save for child's education?",
+                "Planning to buy a house in 5 years",
+            ],
+            confidence_threshold=0.5,
+            api_endpoint="/life-event/plan"
+        ),
+        AgentType.COUPLE_PLANNER: AgentCapability(
+            name="Couple's Planner",
+            agent_type=AgentType.COUPLE_PLANNER,
+            description="Joint Finance Manager - Shared budgets, expense splitting, joint debt payoff, couple's financial planning",
+            keywords=["couple", "wife", "husband", "spouse", "partner", "joint", "together",
+                     "split", "shared", "both of us", "we", "our budget", "combined",
+                     "joint budget", "dual income", "expense split", "joint finance",
+                     "couple finance", "family budget", "partner income"],
+            example_queries=[
+                "Plan joint budget with my wife",
+                "How should we split expenses?",
+                "Combined debt payoff strategy",
+                "Manage finances as a couple",
+            ],
+            confidence_threshold=0.5,
+            api_endpoint="/couple/finances"
+        ),
     }
     
     def __init__(self):
@@ -233,6 +269,18 @@ class DhanSarthiCoordinator:
                 for symbol in ["reliance", "tcs", "infosys", "hdfc", "icici", "happiestminds", "happstmnds"]:
                     if symbol in query_lower:
                         score += 2.0
+            
+            # Life event priority: marriage/baby/education get strong boost
+            if agent_type == AgentType.LIFE_EVENT:
+                for trigger in ["marriage", "wedding", "married", "baby", "child", "birth", "education", "college"]:
+                    if trigger in query_lower:
+                        score += 3.0  # Strong boost to override Yojana's generic "plan"
+            
+            # Couple planner priority: couple/wife/husband/joint get strong boost
+            if agent_type == AgentType.COUPLE_PLANNER:
+                for trigger in ["couple", "wife", "husband", "spouse", "partner", "joint", "both of us"]:
+                    if trigger in query_lower:
+                        score += 3.0  # Strong boost to override Yojana's generic "plan"
             
             agent_scores[agent_type] = score
             matched_keywords[agent_type] = matches
@@ -300,6 +348,17 @@ class DhanSarthiCoordinator:
             if "sebi" in query: return "sebi_regulations"
             if "article" in query: return "constitution_article"
             return "get_disclaimers"
+        
+        elif agent == AgentType.LIFE_EVENT:
+            if "type" in query: return "get_event_types"
+            if any(w in query for w in ["comprehensive", "full", "detailed"]): return "comprehensive_plan"
+            return "plan_life_event"
+        
+        elif agent == AgentType.COUPLE_PLANNER:
+            if "split" in query: return "split_expense"
+            if "budget" in query: return "couple_budget"
+            if "debt" in query: return "couple_debt_payoff"
+            return "couple_finances"
         
         return "general_query"
     

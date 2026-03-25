@@ -437,3 +437,138 @@ async def bridge_list_sessions(user_id: str):
     
     sessions = [{"session_id": r["session_id"], "agent_id": r["agent_id"], "last_message": r["last_message"]} for r in rows]
     return {"sessions": sessions}
+
+# ============ LIFE EVENT ADVISOR ============
+from agents.life_event import (
+    get_event_types,
+    plan_life_event,
+    comprehensive_plan as life_event_comprehensive_plan
+)
+
+@app.get("/life-event/types")
+async def life_event_get_types():
+    """Get all available life event types"""
+    return get_event_types()
+
+@app.post("/life-event/plan")
+async def life_event_plan(request: Dict[str, Any]):
+    """Plan for a specific life event"""
+    return plan_life_event(
+        event_type=request.get("event_type"),
+        years_until=request.get("years_until", 5),
+        current_corpus=request.get("current_corpus", 0),
+        monthly_investment=request.get("monthly_investment", 0),
+        inflation_rate=request.get("inflation_rate", 0.06),
+        expected_return=request.get("expected_return", 0.12)
+    )
+
+@app.post("/life-event/comprehensive")
+async def life_event_comprehensive(request: Dict[str, Any]):
+    """Create comprehensive life event financial plan"""
+    return life_event_comprehensive_plan(
+        age=request.get("age"),
+        income=request.get("income"),
+        current_corpus=request.get("current_corpus", 0),
+        events=request.get("events")
+    )
+
+# ============ COUPLE PLANNER ============
+from agents.couple_planner import (
+    create_couple_plan,
+    calculate_expense_split,
+    CouplePlanner,
+    Person,
+    SplitType
+)
+
+@app.post("/couple/finances")
+async def couple_get_finances(request: Dict[str, Any]):
+    """Get combined finances for a couple"""
+    p1 = Person(name=request.get("person1_name", "Person 1"), income=request.get("person1_income", 0))
+    p2 = Person(name=request.get("person2_name", "Person 2"), income=request.get("person2_income", 0))
+    planner = CouplePlanner(p1, p2)
+    return planner.get_combined_finances()
+
+@app.post("/couple/split-expense")
+async def couple_split_expense(request: Dict[str, Any]):
+    """Calculate how to split an expense between couple"""
+    return calculate_expense_split(
+        person1_name=request.get("person1_name", "Person 1"),
+        person1_income=request.get("person1_income", 0),
+        person2_name=request.get("person2_name", "Person 2"),
+        person2_income=request.get("person2_income", 0),
+        expense_amount=request.get("expense_amount", 0),
+        split_type=request.get("split_type", "proportional")
+    )
+
+@app.post("/couple/plan")
+async def couple_create_plan(request: Dict[str, Any]):
+    """Create comprehensive couple financial plan"""
+    return create_couple_plan(
+        person1_name=request.get("person1_name", "Person 1"),
+        person1_income=request.get("person1_income", 0),
+        person2_name=request.get("person2_name", "Person 2"),
+        person2_income=request.get("person2_income", 0),
+        goals=request.get("goals")
+    )
+
+@app.post("/couple/budget")
+async def couple_create_budget(request: Dict[str, Any]):
+    """Create joint budget plan"""
+    p1 = Person(
+        name=request.get("person1_name", "Person 1"),
+        income=request.get("person1_income", 0),
+        expenses=request.get("person1_expenses", 0),
+        savings=request.get("person1_savings", 0)
+    )
+    p2 = Person(
+        name=request.get("person2_name", "Person 2"),
+        income=request.get("person2_income", 0),
+        expenses=request.get("person2_expenses", 0),
+        savings=request.get("person2_savings", 0)
+    )
+    planner = CouplePlanner(p1, p2)
+    return planner.create_budget_plan(request.get("categories"))
+
+@app.post("/couple/goals")
+async def couple_plan_goals(request: Dict[str, Any]):
+    """Calculate SIP for couple's shared goals"""
+    p1 = Person(
+        name=request.get("person1_name", "Person 1"),
+        income=request.get("person1_income", 0)
+    )
+    p2 = Person(
+        name=request.get("person2_name", "Person 2"),
+        income=request.get("person2_income", 0)
+    )
+    planner = CouplePlanner(p1, p2)
+    
+    # Add goals
+    for goal in request.get("goals", []):
+        planner.add_shared_goal(
+            name=goal["name"],
+            target_amount=goal["target_amount"],
+            deadline_years=goal["years"],
+            priority=goal.get("priority", 3)
+        )
+    
+    return planner.calculate_sip_for_goals(request.get("expected_return", 0.12))
+
+@app.post("/couple/debt-payoff")
+async def couple_debt_payoff(request: Dict[str, Any]):
+    """Plan debt payoff strategy for couple"""
+    p1 = Person(
+        name=request.get("person1_name", "Person 1"),
+        income=request.get("person1_income", 0),
+        debt=request.get("person1_debt", 0)
+    )
+    p2 = Person(
+        name=request.get("person2_name", "Person 2"),
+        income=request.get("person2_income", 0),
+        debt=request.get("person2_debt", 0)
+    )
+    planner = CouplePlanner(p1, p2)
+    return planner.plan_debt_payoff(
+        debts=request.get("debts", []),
+        strategy=request.get("strategy", "avalanche")
+    )

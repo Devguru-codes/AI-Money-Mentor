@@ -196,8 +196,8 @@ async def get_nifty50():
 async def calculate_health_score(request: HealthRequest):
     """Calculate financial health score"""
     result = get_health_score(
-        income=request.income,
-        expenses=request.expenses,
+        monthly_income=request.income,
+        monthly_expenses=request.expenses,
         monthly_savings=request.monthly_savings,
         monthly_investments=request.monthly_investments
     )

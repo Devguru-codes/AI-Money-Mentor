@@ -1,28 +1,53 @@
-# CLAUDE.md - AI Money Mentor Project Context
+# CLAUDE.md — AI Money Mentor Project Context
 
-> **Purpose:** This file provides complete context to Claude (or any AI coding agent) when working on this project via Remote SSH or any other access method.
+> This file should be read by AI agents at the start of each session to understand the full project context.
 
 ---
 
 ## Project Overview
 
-**Name:** AI Money Mentor
-**Type:** Full-stack financial advisory platform for Indian investors
-**Architecture:** Next.js 16 (Frontend) + FastAPI (Backend) + SQLite (Prisma)
+**AI Money Mentor** is an AI-powered personal finance advisory platform for Indian users. It consists of a **Next.js frontend**, a **FastAPI backend**, and an **OpenClaw multi-agent swarm** connected to **9 Telegram bots**. The system makes financial planning as accessible as checking WhatsApp.
 
-### What This Project Does
+---
 
-AI Money Mentor is a comprehensive financial advisory platform with 7 specialized AI agents:
+## Architecture
 
-| Agent | Purpose | Key Features |
-|-------|---------|--------------|
-| **KarVid** | Tax Wizard | Tax calculation, regime comparison, 80C deductions, capital gains |
-| **Yojana** | FIRE Planner | FIRE number calculation, SIP recommendations, retirement planning |
-| **Bazaar** | Market Research | Stock quotes, NIFTY 50 data, top gainers/losers |
-| **Dhan** | Health Score | Financial health assessment, credit score factors |
-| **Niveshak** | MF Portfolio | XIRR calculation, risk metrics, portfolio analysis |
-| **Vidhi** | Compliance | SEBI regulations, RBI guidelines, tax disclaimers |
-| **DhanSarthi** | Coordinator | Routes queries to appropriate agents |
+```
+┌─────────────────────────────────────────────────────┐
+│  Telegram (9 Bots)  ←→  OpenClaw Agent Swarm        │
+│                          (glm-5:cloud via Ollama)    │
+└─────────────────────────────────────────────────────┘
+           ↕ Native Agent-to-Agent Delegation
+┌─────────────────────────────────────────────────────┐
+│  Next.js Frontend (Port 80/3000)                    │
+│    ├── UI Pages (src/app/agents/*)                  │
+│    ├── BFF Proxy Routes (src/app/api/*)             │
+│    └── Prisma + SQLite (user data persistence)      │
+└─────────────────┬───────────────────────────────────┘
+                  ↓ HTTP Proxy
+┌─────────────────────────────────────────────────────┐
+│  FastAPI Backend (Port 8000)                        │
+│    └── backend/agents/ (9 Python calculation modules)│
+└─────────────────────────────────────────────────────┘
+```
+
+**Key Pattern:** Next.js API routes (`/api/*`) proxy all requests to FastAPI (`localhost:8000`). The frontend NEVER calls FastAPI directly from the browser.
+
+---
+
+## The 9 Agents
+
+| # | Agent ID         | Name                     | FastAPI Endpoints                                     | Telegram Bot                  |
+|---|------------------|--------------------------|-------------------------------------------------------|-------------------------------|
+| 1 | `dhan-sarthi`    | DhanSarthi (Coordinator) | `POST /dhan-sarthi/route`                             | @dhansarthi                   |
+| 2 | `karvid`         | KarVid (Tax Wizard)      | `POST /karvid/calculate-tax`, `/karvid/compare-regimes` | @karvid                      |
+| 3 | `yojana`         | YojanaKarta (FIRE)       | `POST /yojana/fire-number`                            | @yojana                       |
+| 4 | `bazaar`         | BazaarGuru (Markets)     | `POST /bazaar/stock-quote`                            | @bazaar                       |
+| 5 | `dhan`           | DhanRaksha (Health)      | `POST /dhan/health-score`                             | @dhan                         |
+| 6 | `niveshak`       | Niveshak (MF X-Ray)      | `POST /niveshak/xirr`                                 | @niveshak                     |
+| 7 | `vidhi`          | Vidhi (Compliance)       | `GET /vidhi/disclaimers`                              | @vidhi                        |
+| 8 | `life-event`     | Life Event Advisor       | `POST /life-event/plan`, `/life-event/comprehensive`  | @financeadvisorisabot         |
+| 9 | `couple-planner` | Couple's Money Planner   | `POST /couple/plan`, `/couple/budget`, `/couple/goals` | @coupleplannerisabot          |
 
 ---
 
@@ -30,270 +55,162 @@ AI Money Mentor is a comprehensive financial advisory platform with 7 specialize
 
 ```
 ai-money-mentor-unified/
-├── frontend/                    # Next.js 16 + React 19
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── agents/         # 7 Agent pages
-│   │   │   │   ├── karvid/     # Tax Wizard UI
-│   │   │   │   ├── yojana/     # FIRE Planner UI
-│   │   │   │   ├── bazaar/     # Market Research UI
-│   │   │   │   ├── dhan/       # Health Score UI
-│   │   │   │   ├── niveshak/   # Portfolio UI
-│   │   │   │   ├── vidhi/      # Compliance UI
-│   │   │   │   └── dhan-sarthi/ # Coordinator UI
-│   │   │   ├── api/            # API routes (proxy to backend)
-│   │   │   │   ├── karvid/route.ts
-│   │   │   │   ├── yojana/route.ts
-│   │   │   │   ├── bazaar/route.ts
-│   │   │   │   ├── dhan/route.ts
-│   │   │   │   ├── niveshak/route.ts
-│   │   │   │   ├── vidhi/route.ts
-│   │   │   │   ├── dhan-sarthi/route.ts
-│   │   │   │   ├── save/       # Save to database
-│   │   │   │   └── auth/       # Authentication
-│   │   │   ├── layout.tsx     # Root layout
-│   │   │   └── page.tsx       # Home page
-│   │   ├── components/        # Reusable components
-│   │   │   └── ui/            # shadcn/ui components
-│   │   └── lib/
-│   │       └── api.ts         # Axios clients for backend
-│   ├── prisma/
-│   │   └── schema.prisma      # Database schema
-│   ├── package.json
-│   └── .env.local             # Frontend env vars
-│
-├── backend/                     # FastAPI + Python
-│   ├── agents/                 # 7 AI agents
-│   │   ├── karvid/            # Tax calculations
-│   │   ├── yojana/            # FIRE planning
-│   │   ├── bazaar/            # Stock data
-│   │   ├── dhan/              # Health scoring
-│   │   ├── niveshak/          # Portfolio analysis
-│   │   ├── vidhi/             # Compliance
-│   │   ├── dhan_sarthi/       # Query routing
-│   │   └── dhan/               # Health score
+├── backend/
+│   ├── api_server.py              # FastAPI main server (574 lines)
+│   ├── requirements.txt           # Python dependencies
+│   ├── agents/
+│   │   ├── dhan_sarthi/           # Coordinator (routes queries)
+│   │   │   ├── coordinator.py
+│   │   │   ├── ai_endpoint.py
+│   │   │   └── ai_responder.py
+│   │   ├── karvid/                # Tax calculations
+│   │   │   ├── tax_calculator.py
+│   │   │   ├── tax_brackets.py
+│   │   │   ├── deductions.py
+│   │   │   ├── capital_gains.py
+│   │   │   └── indian_tax_laws.py
+│   │   ├── yojana/                # FIRE planning
+│   │   │   └── fire_calculator.py
+│   │   ├── bazaar/                # Stock data
+│   │   │   └── stock_data.py
+│   │   ├── dhan/                  # Health scoring
+│   │   │   └── health_score.py
+│   │   ├── niveshak/              # MF portfolio analysis
+│   │   │   ├── portfolio_analyzer.py
+│   │   │   ├── cas_parser.py
+│   │   │   ├── mf_data.py
+│   │   │   └── demo_portfolios.py
+│   │   ├── vidhi/                 # Compliance
+│   │   │   ├── compliance.py
+│   │   │   └── legal_knowledge.py
+│   │   ├── life_event/            # Life event advisor (345 lines)
+│   │   │   └── __init__.py
+│   │   └── couple_planner/        # Couples planner (431 lines)
+│   │       └── __init__.py
 │   ├── bots/
-│   │   └── telegram_bot.py    # Telegram bot handlers
-│   ├── api_server.py          # FastAPI server (main)
-│   ├── requirements.txt       # Python dependencies
-│   └── .env                   # Backend env vars (shared)
+│   │   └── telegram_bot.py
+│   └── tests/
+│       ├── test_all.py
+│       ├── test_karvid.py
+│       └── test_yojana.py
 │
-├── .env                        # Shared environment variables
-├── start-dev.sh               # Development start script
-├── start-prod.sh              # Production start script
-├── Makefile                   # Common commands
-├── ARCHITECTURE.md            # Detailed architecture docs
-└── CLAUDE.md                  # This file
+├── frontend/
+│   ├── src/app/
+│   │   ├── agents/                # 9 agent UI pages
+│   │   │   ├── dhan-sarthi/page.tsx
+│   │   │   ├── karvid/page.tsx
+│   │   │   ├── yojana/page.tsx
+│   │   │   ├── bazaar/page.tsx
+│   │   │   ├── dhan/page.tsx
+│   │   │   ├── niveshak/page.tsx
+│   │   │   ├── vidhi/page.tsx
+│   │   │   ├── life-event/page.tsx
+│   │   │   └── couple-planner/page.tsx
+│   │   ├── api/                   # BFF proxy routes → FastAPI
+│   │   │   ├── dhan-sarthi/route.ts
+│   │   │   ├── karvid/route.ts
+│   │   │   ├── yojana/route.ts
+│   │   │   ├── bazaar/route.ts
+│   │   │   ├── dhan/route.ts
+│   │   │   ├── vidhi/route.ts
+│   │   │   ├── life-event/route.ts
+│   │   │   ├── couple-planner/route.ts
+│   │   │   ├── auth/login/route.ts
+│   │   │   ├── auth/signup/route.ts
+│   │   │   └── save/*/route.ts
+│   │   ├── login/page.tsx
+│   │   ├── profile/page.tsx
+│   │   ├── layout.tsx             # Server component (metadata)
+│   │   └── page.tsx               # Homepage
+│   ├── src/components/
+│   │   ├── ClientLayout.tsx       # Client component (nav, theme)
+│   │   ├── AgentCard.tsx
+│   │   ├── ThemeProvider.tsx
+│   │   └── ui/                    # shadcn/ui components
+│   ├── src/lib/
+│   │   ├── api.ts                 # Axios clients
+│   │   ├── prisma.ts              # Prisma client singleton
+│   │   ├── store.ts               # State store
+│   │   └── utils.ts
+│   ├── prisma/schema.prisma       # Database schema
+│   └── package.json
+│
+├── start-dev.sh                   # Dev startup script
+├── start-prod.sh                  # Production startup script
+├── Makefile                       # Common commands
+├── ARCHITECTURE.md
+├── IMPLEMENTATION.md
+└── CLAUDE.md                      # This file
 ```
+
+---
+
+## OpenClaw Swarm Configuration
+
+Located at `~/.openclaw/openclaw.json` on the EC2 instance.
+
+- **Model:** `ollama/glm-5:cloud`
+- **Agent-to-Agent:** Enabled. All 9 agents listed in `tools.agentToAgent.allow`
+- **Routing:** DhanSarthi delegates semantically via native OpenClaw tools (NOT keyword parsing)
+- **Skills:** Each agent has a `SKILL.md` with YAML frontmatter in `~/.openclaw/skills/`
+- **Personas:** Each agent has an `AGENTS.md` in `~/.openclaw/agents/{id}/agent/`
 
 ---
 
 ## Tech Stack
 
-### Frontend
-- **Framework:** Next.js 16 (App Router)
-- **React:** 19
-- **UI:** Tailwind CSS v4 + shadcn/ui
-- **Database:** SQLite via Prisma ORM
-- **HTTP Client:** Axios
-
-### Backend
-- **Framework:** FastAPI (Python 3.10+)
-- **Data Processing:** pandas, numpy, scipy
-- **Financial Data:** yfinance, mftool
-- **Telegram:** python-telegram-bot
-- **AI Integration:** OpenAI API (optional)
-
-### Key Dependencies
-```json
-// Frontend (package.json)
-"next": "^16.0.0",
-"react": "^19.0.0",
-"@prisma/client": "^5.22.0",
-"axios": "^1.6.0"
-```
-
-```txt
-# Backend (requirements.txt)
-fastapi>=0.135.0
-uvicorn>=0.42.0
-yfinance>=1.2.0
-pandas>=2.3.0
-mftool>=3.2
-python-telegram-bot>=21.0
-openai>=1.0.0
-python-dotenv
-```
-
----
-
-## Environment Variables
-
-### Required (.env)
-
-```env
-# Database
-DATABASE_URL="file:./frontend/prisma/dev.db"
-
-# API URLs
-NEXT_PUBLIC_API_URL=http://localhost:8000
-BACKEND_URL=http://localhost:8000
-
-# Telegram Bot Tokens (7 bots)
-DHANSARTHI_BOT_TOKEN=your_token_here
-KARVID_BOT_TOKEN=your_token_here
-NIVESHAK_BOT_TOKEN=your_token_here
-YOJANA_BOT_TOKEN=your_token_here
-BAZAAR_BOT_TOKEN=your_token_here
-DHAN_BOT_TOKEN=your_token_here
-VIDHI_BOT_TOKEN=your_token_here
-
-# OpenAI (optional, for AI explanations)
-OPENAI_API_KEY=your_key_here
-```
+| Layer     | Technology                              |
+|-----------|-----------------------------------------|
+| Frontend  | Next.js 16, React 19, Tailwind v4, shadcn/ui |
+| Backend   | FastAPI, Python 3.10+                   |
+| Database  | SQLite via Prisma ORM                   |
+| AI Swarm  | OpenClaw + Ollama (glm-5:cloud)         |
+| Telegram  | python-telegram-bot + OpenClaw bindings |
+| CI/CD     | GitHub Actions (Jest + build)           |
 
 ---
 
 ## How to Run
 
-### Development
 ```bash
-# Start both frontend and backend
-./start-dev.sh
+# Full stack (dev)
+./start-dev.sh    # or: make dev
 
-# Or use Makefile
-make dev
-
-# Frontend: http://localhost:3000
-# Backend: http://localhost:8000
-# API Docs: http://localhost:8000/docs
-```
-
-### Production
-```bash
-./start-prod.sh
-# or
-make start
-```
-
-### Individual Services
-```bash
 # Backend only
-cd backend
-source venv/bin/activate
+cd backend && source venv/bin/activate
 uvicorn api_server:app --host 0.0.0.0 --port 8000
 
 # Frontend only
-cd frontend
-npm run dev  # development
-npm run build && npm run start  # production
+cd frontend && npm run dev
+
+# Tests
+cd frontend && npm test       # Jest (17 tests)
+cd backend && pytest tests/   # Python tests
 ```
 
 ---
 
-## API Endpoints
+## Deployment
 
-### Backend (FastAPI)
-
-| Endpoint | Method | Agent | Description |
-|----------|--------|-------|-------------|
-| `/` | GET | - | Service info |
-| `/health` | GET | - | Health check |
-| `/karvid/calculate-tax` | POST | KarVid | Calculate tax |
-| `/karvid/compare-regimes` | POST | KarVid | Compare old vs new regime |
-| `/yojana/fire-number` | POST | Yojana | Calculate FIRE number |
-| `/bazaar/stock-quote` | POST | Bazaar | Get stock price |
-| `/dhan/health-score` | POST | Dhan | Calculate financial health |
-| `/niveshak/xirr` | POST | Niveshak | Calculate XIRR |
-| `/vidhi/disclaimers` | GET | Vidhi | Get tax disclaimers |
-| `/dhan-sarthi/route` | POST | DhanSarthi | Route query to agent |
-
-### Frontend API Routes (Proxy to Backend)
-
-All routes in `/api/*` proxy requests to `BACKEND_URL` (default: `http://localhost:8000`)
-
----
-
-## Database Schema (Prisma)
-
-```prisma
-model User {
-  id            String        @id @default(uuid())
-  telegramId    String?       @unique
-  email         String?       @unique
-  name          String?
-  phone         String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  
-  portfolio     Portfolio?
-  taxProfiles   TaxProfile[]
-  fireGoals     FIREGoal[]
-  healthScores  HealthScore[]
-  chatHistory   ChatMessage[]
-}
-
-model Portfolio {
-  id            String        @id @default(uuid())
-  userId        String        @unique
-  user          User          @relation(fields: [userId])
-  holdings      Holding[]
-  totalValue    Float
-  xirr          Float?
-  riskScore     Float?
-}
-
-// ... more models in prisma/schema.prisma
-```
-
----
-
-## Key Design Decisions
-
-### 1. Hybrid Architecture
-- **Frontend (Next.js)**: Handles UI, routing, and API proxying
-- **Backend (FastAPI)**: Handles business logic, calculations, and external APIs
-- **Why**: Clean separation, scalable, easy to deploy independently
-
-### 2. API Proxy Pattern
-- Frontend API routes (`/api/*`) proxy to backend
-- **Why**: Avoids CORS issues, allows same-origin requests
-- **How**: `BACKEND_URL` environment variable configures backend location
-
-### 3. SQLite + Prisma
-- **Why**: Simple, no external database server needed for MVP
-- **Migration**: Can switch to PostgreSQL by changing `DATABASE_URL`
-
-### 4. Agent Architecture
-- Each agent is a self-contained Python module
-- `api_server.py` imports and exposes agent functions
-- **Why**: Modular, easy to add new agents
+- **EC2:** `ubuntu@3.109.186.88`
+- **Frontend:** Port 80 (Nginx → Next.js :3000)
+- **Backend:** Port 8000 (uvicorn)
+- **GitHub:** https://github.com/Devguru-codes/AI-Money-Mentor
 
 ---
 
 ## Common Tasks
 
 ### Add a New Agent
-
-1. Create `backend/agents/new_agent/` with `__init__.py` and logic
-2. Import in `api_server.py`
-3. Add API endpoints
-4. Create `frontend/src/app/agents/new_agent/page.tsx`
-5. Add API route in `frontend/src/app/api/new_agent/route.ts`
-6. Add axios client in `frontend/src/lib/api.ts`
-
-### Add a New API Endpoint
-
-```python
-# backend/api_server.py
-@app.post("/new-endpoint")
-async def new_endpoint(data: RequestModel):
-    result = await agent_function(data)
-    return result
-```
+1. Create `backend/agents/new_agent/` with `__init__.py`
+2. Import and add endpoints in `api_server.py`
+3. Create `frontend/src/app/agents/new-agent/page.tsx`
+4. Create `frontend/src/app/api/new-agent/route.ts`
+5. Register in `~/.openclaw/openclaw.json` (agents.list + agentToAgent.allow + bindings)
+6. Create `~/.openclaw/skills/new-agent/SKILL.md` with YAML frontmatter
+7. Create `~/.openclaw/agents/new-agent/agent/AGENTS.md` persona
 
 ### Database Migration
-
 ```bash
 cd frontend
 npx prisma migrate dev --name description
@@ -302,97 +219,8 @@ npx prisma generate
 
 ---
 
-## Current State & Known Issues
-
-### Working ✅
-- All 7 agent pages render correctly
-- Backend API endpoints respond
-- Tax calculation (KarVid) works
-- FIRE planning (Yojana) works
-- Stock data (Bazaar) works
-- Health score (Dhan) works
-- Portfolio XIRR (Niveshak) works
-- Compliance (Vidhi) works
-- Frontend builds successfully
-
-### Known Issues ⚠️
-- Telegram bots need token regeneration (tokens were leaked)
-- Some agents may need API keys for external data
-- Prisma client needs regeneration on fresh install
-
----
-
 ## Security Notes
 
-### Never Commit These
-- `.env` files with real tokens
-- API keys
-- Telegram bot tokens
-- Database files with user data
+**Never commit:** `.env` files, API keys, Telegram bot tokens, `*.db` files.
 
-### Already in .gitignore
-```
-.env
-*.db
-*.db-journal
-node_modules/
-.next/
-__pycache__/
-venv/
-```
-
----
-
-## Deployment
-
-### EC2 (Current)
-- **Server:** `ubuntu@3.109.186.88`
-- **SSH Key:** `~/.openclaw/workspace/et-genai-key.pem`
-- **Frontend:** http://3.109.186.88/ (port 80)
-- **Backend:** http://3.109.186.88:8000/
-
-### Vercel + Railway (Recommended)
-- Frontend → Vercel (auto-deploys from GitHub)
-- Backend → Railway or Render (Docker deployment)
-
----
-
-## Contact & Context
-
-- **Owner:** Devguru Tiwari (@Devguru-codes)
-- **Email:** bt23csd060@iiitn.ac.in
-- **GitHub:** https://github.com/Devguru-codes/AI-Money-Mentor
-
----
-
-## Quick Reference
-
-```bash
-# Install dependencies
-make install
-
-# Start development
-make dev
-
-# Start production
-make start
-
-# Stop all services
-make stop
-
-# Check status
-make status
-
-# Run tests
-make test
-
-# Clean build artifacts
-make clean
-
-# Git push
-git add -A && git commit -m "message" && git push origin main
-```
-
----
-
-_This file should be read by Claude/AI agents at the start of each session to understand the full project context._
+**Already in .gitignore:** `.env`, `*.db`, `*.db-journal`, `node_modules/`, `.next/`, `__pycache__/`, `venv/`

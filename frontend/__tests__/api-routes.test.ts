@@ -49,7 +49,7 @@ describe('KarVid Tax API', () => {
     mockBackendSuccess({ tax: 150000, regime: 'new' })
 
     const res = await POST(createMockRequest({ income: 1500000, regime: 'new' }))
-    const data = res.data || (await res.json())
+    const data = await res.json()
 
     expect(mockFetch).toHaveBeenCalledTimes(1)
     expect(data.tax).toBe(150000)
@@ -60,7 +60,7 @@ describe('KarVid Tax API', () => {
     mockBackendDown()
 
     const res = await POST(createMockRequest({ income: 1500000 }))
-    const data = res.data || (await res.json())
+    const data = await res.json()
 
     expect(data.error).toBeDefined()
     expect(res.status).toBe(503)
@@ -77,7 +77,7 @@ describe('Yojana FIRE API', () => {
     mockBackendSuccess({ fire_number: 30000000, sip_needed: 25000 })
 
     const res = await POST(createMockRequest({ monthly_expenses: 50000 }))
-    const data = res.data || (await res.json())
+    const data = await res.json()
 
     expect(data.fire_number).toBe(30000000)
   })
@@ -93,7 +93,7 @@ describe('Bazaar Stock API', () => {
     mockBackendSuccess({ symbol: 'RELIANCE', price: 2900 })
 
     const res = await POST(createMockRequest({ symbol: 'RELIANCE' }))
-    const data = res.data || (await res.json())
+    const data = await res.json()
 
     expect(data.symbol).toBe('RELIANCE')
   })
@@ -109,7 +109,7 @@ describe('Dhan Health Score API', () => {
     mockBackendSuccess({ score: 72, grade: 'B+' })
 
     const res = await POST(createMockRequest({ income: 100000, expenses: 60000 }))
-    const data = res.data || (await res.json())
+    const data = await res.json()
 
     expect(data.score).toBe(72)
   })
@@ -125,7 +125,7 @@ describe('Vidhi Compliance API', () => {
     mockBackendSuccess({ disclaimers: ['Not financial advice'] })
 
     const res = await GET()
-    const data = res.data || (await res.json())
+    const data = await res.json()
 
     expect(data.disclaimers).toContain('Not financial advice')
   })
@@ -150,7 +150,7 @@ describe('Life Event API', () => {
       years_until: 5,
       current_corpus: 100000,
     }))
-    const data = res.data || (await res.json())
+    const data = await res.json()
 
     expect(data.event).toBe('marriage')
     expect(data.sip_needed).toBe(15000)
@@ -165,7 +165,7 @@ describe('Life Event API', () => {
     })
 
     const res = await GET()
-    const data = res.data || (await res.json())
+    const data = await res.json()
 
     expect(data.marriage).toBeDefined()
     expect(data.child_birth).toBeDefined()
@@ -176,7 +176,7 @@ describe('Life Event API', () => {
     mockBackendDown()
 
     const res = await POST(createMockRequest({ event_type: 'marriage', years_until: 5 }))
-    const data = res.data || (await res.json())
+    const data = await res.json()
 
     expect(data.error).toBeDefined()
     expect(res.status).toBe(503)
@@ -203,7 +203,7 @@ describe('Couple Planner API', () => {
       person2_name: 'Bob',
       person2_income: 80000,
     }))
-    const data = res.data || (await res.json())
+    const data = await res.json()
 
     expect(data.combined_income).toBe(200000)
     expect(data.net_worth).toBe(1500000)
@@ -247,7 +247,7 @@ describe('Couple Planner API', () => {
     mockBackendDown()
 
     const res = await POST(createMockRequest({ action: 'finances' }))
-    const data = res.data || (await res.json())
+    const data = await res.json()
 
     expect(data.error).toBeDefined()
     expect(res.status).toBe(503)
@@ -264,7 +264,7 @@ describe('DhanSarthi Coordinator API', () => {
     mockBackendSuccess({ primary_agent: 'karvid', confidence: 0.95 })
 
     const res = await POST(createMockRequest({ query: 'calculate my tax' }))
-    const data = res.data || (await res.json())
+    const data = await res.json()
 
     expect(data.primary_agent).toBe('karvid')
   })

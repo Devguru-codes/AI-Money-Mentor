@@ -69,7 +69,7 @@ async def root():
     return {
         "service": "AI Money Mentor API",
         "version": "1.0.0",
-        "agents": ["niveshak", "karvid", "yojana", "bazaar", "dhan", "vidhi"]
+        "agents": ["niveshak", "karvid", "yojana", "bazaar", "dhan", "vidhi", "dhan-sarthi", "life-event", "couple-planner"]
     }
 
 @app.get("/health")
@@ -85,9 +85,10 @@ async def calculate_xirr(request: XIRRRequest):
     return {"xirr_percent": round(xirr, 2)}
 
 @app.post("/niveshak/risk-metrics")
-async def get_risk_metrics(nav_data: List[float]):
+async def get_risk_metrics(request: Dict[str, Any]):
     """Get portfolio risk metrics"""
     analyzer = PortfolioAnalyzer()
+    nav_data = request.get("nav_data", [])
     metrics = analyzer.get_risk_metrics(nav_data)
     return metrics
 
@@ -104,36 +105,44 @@ async def calculate_tax(request: TaxRequest):
     return result
 
 @app.post("/karvid/compare-regimes")
-async def compare_tax_regimes(income: float):
+async def compare_tax_regimes(request: Dict[str, Any]):
     """Compare new vs old tax regime"""
+    income = request.get("income", 0)
     result = compare_regimes(income)
     return result
 
 @app.post("/karvid/80c")
-async def calculate_80c(deductions: Dict[str, float]):
+async def calculate_80c(request: Dict[str, Any]):
     """Calculate 80C deductions"""
+    allowed_keys = ["ppf", "elss", "lic", "nps", "tuition_fees", "home_loan_principal"]
+    deductions = {k: v for k, v in request.items() if k in allowed_keys}
     result = calculate_80c_deduction(**deductions)
     return result
 
 @app.post("/karvid/capital-gains")
-async def calculate_capital_gains(gain: float, holding_period: str = "long"):
+async def calculate_capital_gains(request: Dict[str, Any]):
     """Calculate capital gains tax"""
+    gain = request.get("gain", 0)
+    holding_period = request.get("holding_period", "long")
     if holding_period == "long":
         result = calculate_equity_ltcg(gain)
     else:
-        result = {"tax": gain * 0.20, "holding_period": "short"}
+        result = {"tax": gain * 0.15, "holding_period": "short"}  # STCG on equity is 15%
     return result
 
 # ============ YOJANAKARTA (FIRE Planner) ============
 @app.post("/yojana/fire-number")
-async def get_fire_number(monthly_expenses: float):
+async def get_fire_number(request: Dict[str, Any]):
     """Calculate FIRE number"""
+    monthly_expenses = request.get("monthly_expenses", 50000)
     result = calculate_fire_number_india(monthly_expenses)
     return result
 
 @app.post("/yojana/sip-recommendation")
-async def get_sip(target_corpus: float, years: int):
+async def get_sip(request: Dict[str, Any]):
     """Get SIP recommendation"""
+    target_corpus = request.get("target_corpus", 10000000)
+    years = request.get("years", 10)
     result = get_sip_recommendation(target_corpus, years)
     return result
 
@@ -207,16 +216,13 @@ async def get_sebi_regulations():
 
 # ============ DHAN SARTHI (Coordinator) ============
 @app.post("/dhan-sarthi/route")
-async def route_query(query: str):
+async def route_query(request: Dict[str, Any]):
     """Route query to appropriate agent"""
     from agents.dhan_sarthi.coordinator import DhanSarthiCoordinator
     coordinator = DhanSarthiCoordinator()
+    query = request.get("query", "")
     result = coordinator.parse_query(query)
     return result
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 # ============ KARVID TAX LAW ENDPOINTS ============
 @app.get("/karvid/section/{section}")
@@ -572,3 +578,8 @@ async def couple_debt_payoff(request: Dict[str, Any]):
         debts=request.get("debts", []),
         strategy=request.get("strategy", "avalanche")
     )
+
+# ============ MAIN ============
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -1,6 +1,6 @@
 yfinance>=1.2.0
 pandas>=2.3.0
-pandas-ta==0.4.71b0
+# pandas-ta>=0.3.14b1  # Optional: requires Python 3.12+ for technical analysis indicators
 streamlit>=1.55.0
 fastapi>=0.135.0
 uvicorn>=0.42.0

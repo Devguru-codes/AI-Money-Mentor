@@ -5,15 +5,12 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const query = body.query || 'hello'
 
-    const response = await fetch(
-      `${BACKEND_URL}/dhan-sarthi/route?query=${encodeURIComponent(query)}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      }
-    )
+    const response = await fetch(`${BACKEND_URL}/dhan-sarthi/route`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
 
     if (!response.ok) {
       return NextResponse.json(

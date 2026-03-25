@@ -22,6 +22,9 @@ const agentNames: Record<string, string> = {
   bazaar: "BazaarGuru",
   dhan: "DhanRaksha",
   vidhi: "Vidhi",
+  "life-event": "Life Event Advisor",
+  "couple-planner": "Couple's Planner",
+  "dhan-sarthi": "DhanSarthi",
 }
 
 // Extract numbers from user query
@@ -289,13 +292,16 @@ export default function DhanSarthiPage() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
+
+  useEffect(() => {
     fetch("/api/dhan-sarthi")
       .then((res) => {
         if (res.ok) setBackendStatus("online")
         else setBackendStatus("offline")
       })
       .catch(() => setBackendStatus("offline"))
-  }, [messages])
+  }, [])
 
   const handleSend = async () => {
     if (!input.trim() || loading) return
@@ -433,6 +439,36 @@ export default function DhanSarthiPage() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ symbol }),
+              })
+              if (agentResponse.ok) agentData = await agentResponse.json()
+              break
+            }
+            case "life-event": {
+              const amount = extractNumber(query)
+              agentResponse = await fetch("/api/life-event", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  event_type: "marriage",
+                  years_until: 5,
+                  current_corpus: amount || 0,
+                }),
+              })
+              if (agentResponse.ok) agentData = await agentResponse.json()
+              break
+            }
+            case "couple-planner": {
+              const income = extractNumber(query)
+              agentResponse = await fetch("/api/couple-planner", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  action: "plan",
+                  person1_name: "Partner 1",
+                  person1_income: income || 50000,
+                  person2_name: "Partner 2",
+                  person2_income: income || 50000,
+                }),
               })
               if (agentResponse.ok) agentData = await agentResponse.json()
               break

@@ -11,7 +11,7 @@ import sys
 import os
 
 # Add project to path
-sys.path.insert(0, '/home/ubuntu/ai-money-mentor')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Import all agent modules
 from agents.niveshak.portfolio_analyzer import PortfolioAnalyzer

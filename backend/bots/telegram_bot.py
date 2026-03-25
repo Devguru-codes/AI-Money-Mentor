@@ -190,6 +190,8 @@ async def handle_start(update: Update, context: ContextTypes.DEFAULT_TYPE, agent
         "bazaar": "BazaarGuru - Market Research",
         "dhan": "DhanRaksha - Health Expert",
         "vidhi": "Vidhi - Compliance",
+        "lifeevent": "JeevanSarthi - Life Event Advisor",
+        "coupleplanner": "CoupleSathi - Couple Planner",
     }
     
     name = agent_names.get(agent, "AI Money Mentor")

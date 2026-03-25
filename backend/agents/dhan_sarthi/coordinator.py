@@ -12,6 +12,7 @@ import requests
 
 class AgentType(Enum):
     """Available specialist agents"""
+    DHAN_SARTHI = "dhan-sarthi" # Coordinator/Greeting/Generic
     NIVESHAK = "niveshak"       # MF Portfolio X-Ray
     KARVID = "karvid"           # Tax Wizard
     YOJANAKARTA = "yojana"      # FIRE Planner
@@ -76,6 +77,25 @@ class DhanSarthiCoordinator:
     
     # Agent capabilities with detailed knowledge
     AGENTS: Dict[AgentType, AgentCapability] = {
+        AgentType.DHAN_SARTHI: AgentCapability(
+            name="DhanSarthi",
+            agent_type=AgentType.DHAN_SARTHI,
+            description="AI Money Mentor Coordinator - Greets, explains capabilities, routes queries to specialist agents",
+            keywords=["hello", "hi", "hey", "namaste", "namaskar", "good morning", "good evening",
+                     "good afternoon", "help", "what can you do", "who are you", "about",
+                     "explain", "how does it work", "what is this", "start", "menu",
+                     "thank", "thanks", "dhanyavaad", "shukriya", "bye", "goodbye"],
+            example_queries=[
+                "Hello!",
+                "What can you do?",
+                "Who are you?",
+                "How does this work?",
+                "Thank you for the help!",
+            ],
+            confidence_threshold=0.3,
+            can_delegate=False,
+            api_endpoint="/dhan-sarthi/route"
+        ),
         AgentType.NIVESHAK: AgentCapability(
             name="Niveshak",
             agent_type=AgentType.NIVESHAK,
@@ -235,7 +255,66 @@ class DhanSarthiCoordinator:
             RoutingResult with agent, confidence, and timing
         """
         start_time = time.time()
-        query_lower = query.lower()
+        query_lower = query.lower().strip()
+        
+        # ---- GREETING / GENERIC DETECTION (before keyword scoring) ----
+        greetings = ["hello", "hi", "hey", "namaste", "namaskar", "good morning",
+                     "good evening", "good afternoon", "good night", "howdy",
+                     "sup", "yo", "hola", "greetings"]
+        help_words = ["what can you do", "who are you", "help me", "what is this",
+                      "how does this work", "what do you do", "about", "menu",
+                      "capabilities", "features", "start"]
+        thanks_words = ["thank", "thanks", "dhanyavaad", "shukriya", "bye",
+                        "goodbye", "see you", "take care"]
+        explain_words = ["what is", "explain", "how does", "tell me about",
+                         "meaning of", "define"]
+        
+        # Check for pure greetings (nothing else meaningful)
+        is_greeting = any(query_lower.startswith(g) or query_lower == g for g in greetings)
+        is_help = any(h in query_lower for h in help_words)
+        is_thanks = any(t in query_lower for t in thanks_words)
+        is_generic_explain = any(query_lower.startswith(e) for e in explain_words)
+        
+        # If it's a pure greeting/help/thanks with no finance-specific keywords
+        finance_specifics = ["tax", "stock", "fund", "sip", "fire", "retire", "income",
+                            "invest", "portfolio", "deduction", "regime", "nifty", "share",
+                            "sebi", "health score", "capital gain", "marriage", "couple",
+                            "wife", "husband", "baby", "wedding", "mutual fund"]
+        has_finance_content = any(f in query_lower for f in finance_specifics)
+        
+        if (is_greeting or is_help or is_thanks) and not has_finance_content:
+            processing_time = (time.time() - start_time) * 1000
+            self.latency_stats["routing"].append(processing_time)
+            
+            intent = "greeting"
+            if is_help: intent = "help"
+            elif is_thanks: intent = "thanks"
+            
+            return RoutingResult(
+                query=query,
+                primary_agent=AgentType.DHAN_SARTHI,
+                confidence=1.0,
+                intent=intent,
+                secondary_agents=[],
+                api_endpoint="/dhan-sarthi/route",
+                suggestions=[cap.example_queries[0] for cap in list(self.AGENTS.values())[1:5]],
+                processing_time_ms=processing_time
+            )
+        
+        # For generic explanations without finance keywords, handle via DhanSarthi
+        if is_generic_explain and not has_finance_content:
+            processing_time = (time.time() - start_time) * 1000
+            self.latency_stats["routing"].append(processing_time)
+            return RoutingResult(
+                query=query,
+                primary_agent=AgentType.DHAN_SARTHI,
+                confidence=0.8,
+                intent="explain",
+                secondary_agents=[],
+                api_endpoint="/dhan-sarthi/route",
+                suggestions=[cap.example_queries[0] for cap in list(self.AGENTS.values())[1:5]],
+                processing_time_ms=processing_time
+            )
         
         # Score each agent based on keyword matches
         agent_scores: Dict[AgentType, float] = {}

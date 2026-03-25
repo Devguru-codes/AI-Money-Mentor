@@ -285,10 +285,35 @@ async def get_sebi_regulations():
 @app.post("/dhan-sarthi/route")
 async def route_query(request: Dict[str, Any]):
     """Route query to appropriate agent"""
-    from agents.dhan_sarthi.coordinator import DhanSarthiCoordinator
+    from agents.dhan_sarthi.coordinator import DhanSarthiCoordinator, AgentType
     coordinator = DhanSarthiCoordinator()
     query = request.get("query", "")
     result = coordinator.parse_query(query)
+    
+    # If DhanSarthi handles it directly (greeting/help/thanks/explain)
+    if result.primary_agent == AgentType.DHAN_SARTHI:
+        agent_list = [cap.name + " (" + cap.agent_type.value + ")" 
+                      for cap in coordinator.AGENTS.values() 
+                      if cap.agent_type != AgentType.DHAN_SARTHI]
+        
+        responses = {
+            "greeting": "Namaste! I'm DhanSarthi, your AI Money Mentor. I coordinate a team of 8 specialist agents to help you with taxes, investments, retirement planning, and more. How can I help you today?",
+            "help": "I'm DhanSarthi, the brain of AI Money Mentor! Here's what my team can do:\n" + "\n".join(["- " + name for name in agent_list]) + "\nJust ask me anything financial and I'll route you to the right expert!",
+            "thanks": "You're welcome! Happy to help with your financial journey. Feel free to ask me anything anytime. Dhanyavaad! 🙏",
+            "explain": "I'm DhanSarthi, an AI-powered financial coordinator. I analyze your query and route it to the best specialist agent. Try asking about taxes, stocks, retirement, or financial health!",
+        }
+        
+        return {
+            "query": result.query,
+            "primary_agent": result.primary_agent.value,
+            "confidence": result.confidence,
+            "intent": result.intent,
+            "response": responses.get(result.intent, responses["greeting"]),
+            "available_agents": agent_list,
+            "suggestions": result.suggestions,
+            "processing_time_ms": result.processing_time_ms
+        }
+    
     return result
 
 # ============ KARVID TAX LAW ENDPOINTS ============

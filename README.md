@@ -1,220 +1,317 @@
-# AI Money Mentor
+<p align="center">
+  <h1 align="center">💰 AI Money Mentor</h1>
+  <p align="center">
+    <strong>India's First Multi-Agent Personal Finance Platform</strong><br/>
+    9 specialized AI agents orchestrated by OpenClaw for tax planning, FIRE retirement, stock analysis, and couple's financial management.
+  </p>
+</p>
 
-> **India's First Multi-Agent Personal Finance Platform**  
-> A comprehensive financial mentor combining AI agents with precise calculations.
-
-[![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-green.svg)](https://fastapi.tiangolo.com/)
-[![Prisma](https://img.shields.io/badge/Prisma-5.22-blue.svg)](https://www.prisma.io/)
-[![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/)
-
----
-
-## Architecture
-
-```
-ai-money-mentor/
-├── frontend/                # Next.js 16 + React 19
-│   ├── src/                 # React components & pages
-│   │   ├── app/             # App Router pages
-│   │   │   ├── agents/      # Agent pages (KarVid, Yojana, etc.)
-│   │   │   └── api/         # API routes
-│   │   ├── components/      # UI components (shadcn/ui)
-│   │   └── lib/             # Utilities & Prisma client
-│   ├── prisma/              # Database schema
-│   └── package.json
-│
-├── backend/                 # FastAPI + Python
-│   ├── agents/              # AI agents (KarVid, Yojana, etc.)
-│   │   ├── karvid/          # Tax calculations
-│   │   ├── yojana/          # FIRE planning
-│   │   ├── bazaar/          # Stock data
-│   │   ├── dhan/            # Health score
-│   │   ├── niveshak/        # Portfolio analysis
-│   │   └── vidhi/           # Compliance
-│   ├── bots/                # Telegram bots
-│   ├── api_server.py        # FastAPI server
-│   └── requirements.txt
-│
-└── .env                     # Shared environment variables
-```
+<p align="center">
+  <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-16.2-000000?logo=nextdotjs" alt="Next.js"/></a>
+  <a href="https://fastapi.tiangolo.com/"><img src="https://img.shields.io/badge/FastAPI-0.135-009688?logo=fastapi" alt="FastAPI"/></a>
+  <a href="https://www.prisma.io/"><img src="https://img.shields.io/badge/Prisma-5.22-2D3748?logo=prisma" alt="Prisma"/></a>
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python" alt="Python"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/OpenClaw-2026.3-blueviolet" alt="OpenClaw"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/Agents-9-orange" alt="Agents"/></a>
+</p>
 
 ---
 
-## Tech Stack
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Next.js Frontend                        │
+│   Landing • 9 Agent Pages • Auth • Profile • Dashboard      │
+│                    (Port 3000)                               │
+└────────────────────┬────────────────────────────────────────┘
+                     │  BFF Proxy (/api/*)
+                     ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   FastAPI Backend                            │
+│                    (Port 8000)                               │
+│                                                             │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐       │
+│  │ KarVid   │ │ Yojana   │ │ Bazaar   │ │ Dhan     │       │
+│  │ (Tax)    │ │ (FIRE)   │ │ (Stocks) │ │ (Health) │       │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘       │
+│  ┌──────────┐ ┌──────────┐ ┌──────────────────────┐        │
+│  │ Niveshak │ │ Vidhi    │ │ DhanSarthi           │        │
+│  │ (MF)     │ │ (Legal)  │ │ (Coordinator/Swarm)  │        │
+│  └──────────┘ └──────────┘ └──────────────────────┘        │
+│  ┌──────────────────┐ ┌──────────────────────┐              │
+│  │ Life Event       │ │ Couple Planner       │              │
+│  │ (Marriage, etc.) │ │ (Joint Finance)      │              │
+│  └──────────────────┘ └──────────────────────┘              │
+└──────────────────┬──────────────────────────────────────────┘
+                   │
+        ┌──────────▼──────────┐
+        │  OpenClaw Gateway   │
+        │  (Agent Swarm)      │
+        └─────────────────────┘
+```
+
+---
+
+## 🤖 The 9 Agents
+
+| # | Agent | Role | Key Features |
+|---|-------|------|--------------|
+| 1 | **KarVid** 🧾 | Tax Wizard | Old vs New regime comparison, 80C/80D deductions, capital gains, Indian Tax Laws DB |
+| 2 | **YojanaKarta** 🎯 | FIRE Planner | FIRE number calculation, SIP recommendations, retirement planning |
+| 3 | **BazaarGuru** 📈 | Market Analyst | NSE/BSE stock quotes, top gainers, NIFTY 50 data |
+| 4 | **DhanRaksha** 💪 | Health Scorer | 8-factor financial health score with personalized suggestions |
+| 5 | **Niveshak** 📊 | Portfolio Advisor | Mutual fund XIRR/CAGR, risk metrics, CAS statement parsing |
+| 6 | **Vidhi** ⚖️ | Compliance Officer | SEBI regulations, legal disclaimers, financial law lookup |
+| 7 | **DhanSarthi** 🧠 | Coordinator | Routes queries to the right agent via OpenClaw multi-agent swarm |
+| 8 | **Life Event Advisor** 🎉 | Life Planner | Marriage, child birth, education — goal-based SIP planning |
+| 9 | **Couple's Planner** 💑 | Joint Finance | Combined budgets, expense splitting, joint debt payoff strategies |
+
+---
+
+## 🛠️ Tech Stack
 
 | Layer | Technology | Purpose |
 |-------|------------|---------|
-| **Frontend** | Next.js 16, React 19 | Modern web UI |
-| **Styling** | Tailwind CSS v4, shadcn/ui | Beautiful components |
-| **Backend** | FastAPI, Python 3.12 | REST API |
-| **Database** | Prisma, SQLite | ORM & storage |
-| **AI** | OpenClaw, GLM-5 | Agent orchestration |
+| **Frontend** | Next.js 16, React 19, TypeScript | App Router, SSR/SSG |
+| **Styling** | Tailwind CSS v4, shadcn/ui | Responsive UI components |
+| **Backend** | FastAPI, Python 3.12 | REST API with 20+ endpoints |
+| **Database** | Prisma 5, SQLite | User profiles, portfolios, chat history |
+| **AI Orchestration** | OpenClaw 2026.3 | Multi-agent swarm coordination |
+| **Bots** | python-telegram-bot | Telegram integration |
+| **Testing** | Jest, E2E Python tests | 16/16 unit + 16/16 integration tests |
 
 ---
 
-## Features
-
-| Feature | Agent | Description |
-|---------|-------|-------------|
-| **Tax Wizard** | KarVid | Old vs new regime, 80C/80D deductions |
-| **FIRE Planner** | YojanaKarta | FIRE number, retirement planning |
-| **Market Research** | BazaarGuru | NSE/BSE stock quotes |
-| **Health Score** | DhanRaksha | 8-factor financial health |
-| **MF Portfolio** | Niveshak | XIRR, CAGR, portfolio analysis |
-| **Compliance** | Vidhi | SEBI regulations, disclaimers |
-
----
-
-## Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+
-- Python 3.12+
-- npm or pnpm
+- **Node.js** 18+ and npm
+- **Python** 3.11+ (3.12 recommended)
 
-### Frontend Setup
+### 1. Clone
 
 ```bash
-cd frontend
-npm install
-npm run dev
-# Open http://localhost:3000
+git clone https://github.com/Devguru-codes/AI-Money-Mentor.git
+cd AI-Money-Mentor
 ```
 
-### Backend Setup
+### 2. Backend Setup
 
 ```bash
 cd backend
 python -m venv venv
+
+# Linux/Mac
 source venv/bin/activate
+
+# Windows
+.\venv\Scripts\activate
+
 pip install -r requirements.txt
-uvicorn api_server:app --reload --port 8000
-# API at http://localhost:8000
+uvicorn api_server:app --host 0.0.0.0 --port 8000
 ```
 
-### Database Setup
+### 3. Frontend Setup
 
 ```bash
 cd frontend
+npm install
 npx prisma generate
 npx prisma db push
+npm run dev
 ```
+
+### 4. Open in Browser
+
+- **Frontend:** [http://localhost:3000](http://localhost:3000)
+- **API Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 
-## Environment Variables
+## 🔗 API Endpoints
 
-Create `.env` in root:
+### Frontend BFF Proxy Routes
+
+| Route | Method | Backend Target |
+|-------|--------|----------------|
+| `/api/karvid` | POST | `/karvid/calculate-tax` |
+| `/api/yojana` | POST | `/yojana/fire-number` |
+| `/api/bazaar` | POST | `/bazaar/stock-quote` |
+| `/api/dhan` | POST | `/dhan/health-score` |
+| `/api/niveshak` | POST | `/niveshak/analyze` |
+| `/api/vidhi` | GET | `/vidhi/disclaimers` |
+| `/api/dhan-sarthi` | POST | `/dhan-sarthi/route` |
+| `/api/life-event` | POST/GET | `/life-event/plan`, `/life-event/types` |
+| `/api/couple-planner` | POST | `/couple/finances`, `/couple/budget`, `/couple/debt-payoff` |
+
+### Backend Direct Endpoints (20+)
+
+<details>
+<summary>Click to expand full endpoint list</summary>
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/` | GET | Service info + all 9 agents |
+| `/health` | GET | Health check |
+| **KarVid** | | |
+| `/karvid/calculate-tax` | POST | Calculate tax (old/new regime) |
+| `/karvid/compare-regimes` | POST | Compare old vs new regime |
+| `/karvid/80c` | POST | Calculate 80C deductions |
+| `/karvid/capital-gains` | POST | STCG/LTCG tax |
+| `/karvid/section/{section}` | GET | Tax law lookup |
+| **YojanaKarta** | | |
+| `/yojana/fire-number` | POST | Calculate FIRE number |
+| `/yojana/sip-recommendation` | POST | SIP recommendation |
+| `/yojana/retirement-plan` | POST | Full retirement plan |
+| **BazaarGuru** | | |
+| `/bazaar/stock-quote` | POST | Stock quote from NSE |
+| `/bazaar/top-gainers` | GET | Top gaining stocks |
+| `/bazaar/nifty50` | GET | NIFTY 50 list |
+| **DhanRaksha** | | |
+| `/dhan/health-score` | POST | 8-factor health score |
+| **Niveshak** | | |
+| `/niveshak/analyze` | POST | Portfolio analysis |
+| `/niveshak/risk-metrics` | POST | Risk metrics |
+| **Vidhi** | | |
+| `/vidhi/disclaimers` | GET | SEBI disclaimers |
+| `/vidhi/regulations` | GET | SEBI regulations |
+| **Life Event** | | |
+| `/life-event/types` | GET | Supported event types |
+| `/life-event/plan` | POST | Event financial plan |
+| `/life-event/comprehensive` | POST | Full event analysis |
+| **Couple Planner** | | |
+| `/couple/finances` | POST | Combined finances |
+| `/couple/plan` | POST | Joint financial plan |
+| `/couple/budget` | POST | 50/30/20 budget |
+| `/couple/split-expense` | POST | Expense splitting |
+| `/couple/debt-payoff` | POST | Joint debt strategy |
+
+</details>
+
+---
+
+## ⚙️ Environment Variables
+
+Create `.env` in the project root:
 
 ```env
 # Database
 DATABASE_URL="file:./frontend/prisma/dev.db"
 
-# API
-NEXT_PUBLIC_API_URL=http://localhost:8000
+# Backend URL (for frontend BFF proxy)
+BACKEND_URL=http://localhost:8000
 
-# Telegram Bots (get from @BotFather)
+# OpenAI (for AI-powered responses)
+OPENAI_API_KEY=your_key
+
+# Telegram Bots (optional, get from @BotFather)
 DHANSARTHI_BOT_TOKEN=your_token
 KARVID_BOT_TOKEN=your_token
-# ... etc
-
-# OpenAI (for AI responses)
-OPENAI_API_KEY=your_key
 ```
 
 ---
 
-## API Endpoints
-
-### Frontend API Routes
-
-| Route | Method | Description |
-|-------|--------|-------------|
-| `/api/karvid` | POST | Tax calculations |
-| `/api/yojana` | POST | FIRE planning |
-| `/api/bazaar` | POST | Stock quotes |
-| `/api/dhan` | POST | Health score |
-| `/api/dhan-sarthi` | POST | AI chat |
-
-### Backend API Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/health` | GET | Health check |
-| `/karvid/calculate-tax` | POST | Tax calculation |
-| `/yojana/fire` | POST | FIRE number |
-| `/bazaar/stock-quote` | POST | Stock data |
-| `/dhan/health-score` | POST | Health score |
-
----
-
-## Deployment
-
-### Vercel (Frontend)
+## 🧪 Testing
 
 ```bash
+# Unit Tests (Jest) — 16/16
 cd frontend
-vercel --prod
+npx jest
+
+# E2E Integration Tests — 16/16
+cd backend
+python3 tests/e2e_test.py
+
+# Build Verification
+cd frontend
+npx next build
 ```
 
-### Railway/Render (Backend)
+---
+
+## 📁 Project Structure
+
+```
+AI-Money-Mentor/
+├── frontend/                    # Next.js 16 + React 19
+│   ├── src/app/
+│   │   ├── agents/              # 9 agent UI pages
+│   │   │   ├── karvid/          # Tax Wizard
+│   │   │   ├── yojana/          # FIRE Planner
+│   │   │   ├── bazaar/          # Market Analyst
+│   │   │   ├── dhan/            # Health Scorer
+│   │   │   ├── niveshak/        # Portfolio Advisor
+│   │   │   ├── vidhi/           # Compliance Officer
+│   │   │   ├── dhan-sarthi/     # Coordinator (Swarm Hub)
+│   │   │   ├── life-event/      # Life Event Planner
+│   │   │   └── couple-planner/  # Joint Finance Manager
+│   │   └── api/                 # 14 BFF proxy routes
+│   ├── prisma/schema.prisma     # DB models
+│   └── __tests__/               # Jest test suite
+│
+├── backend/                     # FastAPI + Python 3.12
+│   ├── agents/
+│   │   ├── karvid/              # Indian tax engine
+│   │   ├── yojana/              # FIRE calculator
+│   │   ├── bazaar/              # NSE stock data
+│   │   ├── dhan/                # Health score (8-factor)
+│   │   ├── niveshak/            # Portfolio analyzer
+│   │   ├── vidhi/               # SEBI compliance
+│   │   ├── dhan_sarthi/         # Query coordinator
+│   │   ├── life_event/          # Life event planner
+│   │   └── couple_planner/      # Couple finance planner
+│   ├── bots/                    # Telegram bot integrations
+│   ├── api_server.py            # FastAPI app (20+ endpoints)
+│   ├── chat_bridge.py           # OpenClaw ↔ SQLite bridge
+│   └── tests/e2e_test.py        # Integration tests
+│
+└── .openclaw/                   # Agent swarm configuration
+    ├── agents/                  # 9 agent definitions
+    └── SKILL.md                 # Swarm coordination rules
+```
+
+---
+
+## 🚢 Deployment (EC2)
+
+The project runs on an AWS EC2 instance:
 
 ```bash
-cd backend
-# Set environment variables in dashboard
-# Deploy from GitHub
+# SSH into the instance
+ssh -i your-key.pem ubuntu@your-ip
+
+# Start backend
+cd ~/ai-money-mentor-unified/backend
+source venv/bin/activate
+nohup uvicorn api_server:app --host 0.0.0.0 --port 8000 &
+
+# Start frontend
+cd ~/ai-money-mentor-unified/frontend
+nohup npm run dev -- -H 0.0.0.0 &
 ```
 
----
-
-## Project Structure
-
-```
-frontend/
-├── src/
-│   ├── app/
-│   │   ├── agents/
-│   │   │   ├── karvid/      # Tax page
-│   │   │   ├── yojana/      # FIRE page
-│   │   │   ├── bazaar/      # Stocks page
-│   │   │   ├── dhan/        # Health page
-│   │   │   ├── niveshak/    # Portfolio page
-│   │   │   └── vidhi/       # Compliance page
-│   │   └── api/             # API routes
-│   ├── components/          # UI components
-│   └── lib/                 # Utilities
-├── prisma/
-│   └── schema.prisma        # Database models
-└── package.json
-
-backend/
-├── agents/
-│   ├── karvid/              # Tax agent
-│   ├── yojana/              # FIRE agent
-│   ├── bazaar/              # Stock agent
-│   ├── dhan/                # Health agent
-│   ├── niveshak/            # Portfolio agent
-│   └── vidhi/               # Compliance agent
-├── api_server.py            # FastAPI app
-└── requirements.txt
-```
+> **Note:** Ensure ports **3000** and **8000** are open in your AWS Security Group for public access.
 
 ---
 
-## License
+## 📄 License
 
-MIT License - See [LICENSE](LICENSE)
-
----
-
-## Contact
-
-- **Author**: Devguru Tiwari
-- **Email**: bt23csd060@iiitn.ac.in
-- **GitHub**: [@Devguru-codes](https://github.com/Devguru-codes)
+MIT License — See [LICENSE](LICENSE)
 
 ---
 
-**Made for India's financial future**
+## 👤 Author
+
+**Devguru Tiwari**
+- 🎓 IIIT Nagpur (BT23CSD060)
+- 📧 bt23csd060@iiitn.ac.in
+- 🐙 [@Devguru-codes](https://github.com/Devguru-codes)
+
+---
+
+<p align="center">
+  <strong>🇮🇳 Built for India's Financial Future</strong><br/>
+  <em>Empowering every Indian with AI-driven personal finance</em>
+</p>

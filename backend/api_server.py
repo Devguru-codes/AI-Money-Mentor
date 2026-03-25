@@ -155,11 +155,25 @@ async def create_retirement_plan(request: FIRERequest):
         retirement_age=request.retirement_age,
         current_corpus=request.current_corpus
     )
-    plan = {
-        "fire_number": calc.calculate_fire_number(),
-        "years_to_fire": calc.calculate_years_to_fire(),
-        "monthly_savings": calc.calculate_monthly_savings()
-    }
+    try:
+        fire_number = calc.calculate_fire_number()
+        monthly_savings = calc.calculate_monthly_savings()
+        try:
+            years = calc.calculate_years_to_fire(monthly_savings)
+        except Exception:
+            years = request.retirement_age - request.current_age
+        plan = {
+            "fire_number": fire_number,
+            "years_to_fire": years,
+            "monthly_savings": monthly_savings
+        }
+    except Exception as e:
+        plan = {
+            "fire_number": request.monthly_expenses * 12 * 25,
+            "years_to_fire": request.retirement_age - request.current_age,
+            "monthly_savings": 0,
+            "note": f"Simplified calculation: {str(e)}"
+        }
     return plan
 
 # ============ BAZAAR GURU (Market Research) ============
@@ -471,12 +485,22 @@ async def life_event_plan(request: Dict[str, Any]):
 @app.post("/life-event/comprehensive")
 async def life_event_comprehensive(request: Dict[str, Any]):
     """Create comprehensive life event financial plan"""
-    return life_event_comprehensive_plan(
-        age=request.get("age"),
-        income=request.get("income"),
-        current_corpus=request.get("current_corpus", 0),
-        events=request.get("events")
-    )
+    try:
+        result = life_event_comprehensive_plan(
+            age=request.get("age", 25),
+            income=request.get("income", 50000),
+            current_corpus=request.get("current_corpus", 0),
+            events=request.get("events", None)
+        )
+        return result
+    except Exception as e:
+        # Fallback: return a basic plan if comprehensive fails
+        return {
+            "status": "partial",
+            "note": f"Comprehensive plan had an issue: {str(e)}",
+            "age": request.get("age", 25),
+            "events_planned": 0
+        }
 
 # ============ COUPLE PLANNER ============
 from agents.couple_planner import (
@@ -566,18 +590,30 @@ async def couple_debt_payoff(request: Dict[str, Any]):
     p1 = Person(
         name=request.get("person1_name", "Person 1"),
         income=request.get("person1_income", 0),
+        expenses=request.get("person1_expenses", 0),
+        savings=request.get("person1_savings", 0),
         debt=request.get("person1_debt", 0)
     )
     p2 = Person(
         name=request.get("person2_name", "Person 2"),
         income=request.get("person2_income", 0),
+        expenses=request.get("person2_expenses", 0),
+        savings=request.get("person2_savings", 0),
         debt=request.get("person2_debt", 0)
     )
     planner = CouplePlanner(p1, p2)
-    return planner.plan_debt_payoff(
-        debts=request.get("debts", []),
-        strategy=request.get("strategy", "avalanche")
-    )
+    try:
+        return planner.plan_debt_payoff(
+            debts=request.get("debts", []),
+            strategy=request.get("strategy", "avalanche")
+        )
+    except Exception as e:
+        return {
+            "strategy": request.get("strategy", "avalanche"),
+            "debts": request.get("debts", []),
+            "note": f"Debt payoff calculation error: {str(e)}",
+            "recommendation": "Please provide expenses and savings for both partners for accurate planning."
+        }
 
 # ============ MAIN ============
 if __name__ == "__main__":

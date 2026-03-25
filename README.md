@@ -78,6 +78,7 @@
 | **Backend** | FastAPI, Python 3.12 | REST API with 20+ endpoints |
 | **Database** | Prisma 5, SQLite | User profiles, portfolios, chat history |
 | **AI Orchestration** | OpenClaw 2026.3 | Multi-agent swarm coordination |
+| **LLM Backend** | Ollama (local), GLM-5 Cloud | AI inference for agent responses |
 | **Bots** | python-telegram-bot | Telegram integration |
 | **Testing** | Jest, E2E Python tests | 16/16 unit + 16/16 integration tests |
 
@@ -203,8 +204,9 @@ DATABASE_URL="file:./frontend/prisma/dev.db"
 # Backend URL (for frontend BFF proxy)
 BACKEND_URL=http://localhost:8000
 
-# OpenAI (for AI-powered responses)
-OPENAI_API_KEY=your_key
+# OpenClaw Agent Swarm (configured via openclaw CLI on the server)
+# Uses Ollama for local inference or GLM-5 Cloud for hosted AI
+# No API key needed in .env — managed by OpenClaw gateway
 
 # Telegram Bots (optional, get from @BotFather)
 DHANSARTHI_BOT_TOKEN=your_token

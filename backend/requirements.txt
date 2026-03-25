@@ -11,5 +11,5 @@ casparser>=0.8.1
 numpy>=2.2.0
 scipy>=1.11.0
 python-telegram-bot>=21.0
-openai>=1.0.0
+# openai>=1.0.0  # Not used directly — AI handled by OpenClaw + Ollama/GLM-5 Cloud
 python-dotenv

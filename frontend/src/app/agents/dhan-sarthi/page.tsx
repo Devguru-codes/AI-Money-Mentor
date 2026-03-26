@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -303,6 +303,65 @@ export default function DhanSarthiPage() {
       .catch(() => setBackendStatus("offline"))
   }, [])
 
+  // Load chat history on mount
+  useEffect(() => {
+    const loadHistory = async () => {
+      try {
+        const storedUser = localStorage.getItem('user')
+        if (!storedUser) return
+        const userData = JSON.parse(storedUser)
+        if (!userData.id) return
+        const res = await fetch(`/api/save/chat?userId=${userData.id}&limit=50`)
+        if (res.ok) {
+          const data = await res.json()
+          if (data.messages && data.messages.length > 0) {
+            const loaded: Message[] = data.messages.map((m: any) => ({
+              id: m.id,
+              role: 'user' as const,
+              content: m.query,
+              timestamp: new Date(m.createdAt),
+            })).flatMap((m: Message) => {
+              const original = data.messages.find((d: any) => d.id === m.id)
+              return [
+                m,
+                {
+                  id: m.id + '-resp',
+                  role: 'assistant' as const,
+                  content: original?.response || '',
+                  agent: original?.agentType || 'dhan-sarthi',
+                  timestamp: new Date(original?.createdAt || Date.now()),
+                }
+              ]
+            })
+            if (loaded.length > 0) {
+              setMessages(prev => [...prev, ...loaded])
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Could not load chat history:', e)
+      }
+    }
+    loadHistory()
+  }, [])
+
+  // Helper to save chat to DB
+  const saveChat = useCallback(async (query: string, response: string, agentType: string) => {
+    try {
+      const storedUser = localStorage.getItem('user')
+      if (!storedUser) return
+      const userData = JSON.parse(storedUser)
+      if (!userData.id) return
+      await fetch('/api/save/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userData.id, agentType, query, response }),
+      })
+    } catch (e) {
+      console.log('Could not save chat:', e)
+    }
+  }, [])
+
   const handleSend = async () => {
     if (!input.trim() || loading) return
 
@@ -363,6 +422,21 @@ export default function DhanSarthiPage() {
           if (routeResponse.ok) {
             const routeData = await routeResponse.json()
             routedAgent = routeData.primary_agent || "niveshak"
+            
+            // Bug 6 fix: Handle DhanSarthi greeting/help/thanks responses directly
+            if (routedAgent === "dhan-sarthi" && routeData.response) {
+              const greetingMsg = routeData.response
+              setMessages((prev) => [...prev, { 
+                id: String(Date.now() + 1), 
+                role: "assistant", 
+                content: greetingMsg, 
+                agent: "dhan-sarthi", 
+                timestamp: new Date() 
+              }])
+              saveChat(query, greetingMsg, "dhan-sarthi")
+              setLoading(false)
+              return
+            }
           }
         } catch (e) {
           // Fallback routing
@@ -384,6 +458,7 @@ export default function DhanSarthiPage() {
             agent: routedAgent, 
             timestamp: new Date() 
           }])
+          saveChat(query, response, routedAgent)
           setLoading(false)
           return
         }
@@ -512,6 +587,7 @@ export default function DhanSarthiPage() {
         agent: routedAgent, 
         timestamp: new Date() 
       }])
+      saveChat(query, response, routedAgent)
     } catch (error) {
       console.error('Error:', error)
       setMessages((prev) => [...prev, { 

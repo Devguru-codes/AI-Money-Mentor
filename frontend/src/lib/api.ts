@@ -57,6 +57,42 @@ export const dhanApi = {
   },
 }
 
+// MF Portfolio API
+export const niveshakApi = {
+  calculateXIRR: async (data: any) => {
+    const response = await backendApi.post('/niveshak/xirr', data)
+    return response.data
+  },
+  analyzePortfolio: async (data: any) => {
+    const response = await backendApi.post('/niveshak/analyze', data)
+    return response.data
+  },
+}
+
+// Life Event API
+export const lifeEventApi = {
+  planEvent: async (data: any) => {
+    const response = await backendApi.post('/life-event/plan', data)
+    return response.data
+  },
+  getEventTypes: async () => {
+    const response = await backendApi.get('/life-event/types')
+    return response.data
+  },
+}
+
+// Couple Planner API
+export const couplePlannerApi = {
+  planFinances: async (data: any) => {
+    const response = await backendApi.post('/couple/finances', data)
+    return response.data
+  },
+  splitExpense: async (data: any) => {
+    const response = await backendApi.post('/couple/split-expense', data)
+    return response.data
+  },
+}
+
 // Compliance API
 export const vidhiApi = {
   getDisclaimers: async () => {

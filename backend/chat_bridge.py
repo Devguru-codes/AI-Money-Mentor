@@ -15,8 +15,9 @@ from typing import Optional, List, Dict, Any
 from fastapi import HTTPException
 from pydantic import BaseModel
 
-# Database setup
-DB_PATH = os.path.expanduser('~/ai-money-mentor/chat_history.db')
+# Database setup - use project's data directory
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'chat_history.db')
+os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 
 def init_db():
     """Initialize SQLite database for chat history"""

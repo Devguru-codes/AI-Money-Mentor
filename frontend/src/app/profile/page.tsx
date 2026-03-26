@@ -33,12 +33,11 @@ export default function ProfilePage() {
     if (!user) return
     setIsLoading(true)
     try {
-      const response = await fetch('/api/auth/signup', {
+      const response = await fetch('/api/auth/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          telegramId: user.telegramId,
-          email: user.email,
+          userId: user.id,
           name,
           phone,
         }),

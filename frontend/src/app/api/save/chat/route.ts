@@ -25,3 +25,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to save: ' + error.message }, { status: 500 })
   }
 }
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get('userId')
+    const limit = parseInt(searchParams.get('limit') || '20', 10)
+
+    if (!userId) {
+      return NextResponse.json({ error: 'userId is required' }, { status: 400 })
+    }
+
+    const messages = await prisma.chatMessage.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    })
+
+    // Return in chronological order
+    return NextResponse.json({ messages: messages.reverse() })
+  } catch (error: any) {
+    console.error('Load chat error:', error)
+    return NextResponse.json({ error: 'Failed to load: ' + error.message }, { status: 500 })
+  }
+}

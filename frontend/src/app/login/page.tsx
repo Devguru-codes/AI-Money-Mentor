@@ -38,15 +38,32 @@ export default function LoginPage() {
     
     setLoading(true)
     try {
-      const userId = method === "telegram" ? telegramId : email
-      const user = { 
-        id: userId, 
-        telegramId: method === "telegram" ? telegramId : undefined,
-        email: method === "email" ? email : undefined,
-        name: name || (method === "telegram" ? `User_${telegramId.slice(-4)}` : email.split("@")[0]),
-        phone: method === "email" ? phone : undefined,
-        createdAt: new Date().toISOString()
+      const endpoint = authMode === "login" ? "/api/auth/login" : "/api/auth/signup"
+      const payload: any = {}
+      if (method === "telegram") payload.telegramId = telegramId
+      if (method === "email") payload.email = email
+      if (authMode === "signup") {
+        payload.name = name || (method === "telegram" ? `User_${telegramId.slice(-4)}` : email.split("@")[0])
+        if (phone) payload.phone = phone
       }
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+      const data = await response.json()
+
+      if (!response.ok) {
+        if (response.status === 404 && authMode === "login") {
+          toast.error("User not found. Please sign up first.")
+        } else {
+          toast.error(data.error || "Authentication failed")
+        }
+        return
+      }
+
+      const user = data.user
       localStorage.setItem("user", JSON.stringify(user))
       localStorage.setItem("isLoggedIn", "true")
       toast.success(authMode === "login" ? "Welcome back!" : "Account created successfully!")

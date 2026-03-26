@@ -236,18 +236,18 @@ test("Agents", "Bazaar: nifty50 list", t_bazaar_nifty)
 
 # Dhan
 def t_dhan_health():
-    # health-score uses 'income' not 'monthly_income' as the Pydantic model field
-    r = requests.post(f"{API}/dhan/health-score", json={"income": 100000, "monthly_expenses": 60000, "savings": 500000, "debt": 200000, "investments": 2000000, "insurance": True, "emergency_fund": 300000, "age": 30}, timeout=10)
+    # HealthRequest Pydantic model: income, expenses, monthly_savings, monthly_investments, debt, insurance_coverage
+    r = requests.post(f"{API}/dhan/health-score", json={"income": 100000, "expenses": 60000, "monthly_savings": 15000, "monthly_investments": 10000, "debt": 200000, "insurance_coverage": 5000000}, timeout=10)
     d = r.json()
     score = d.get("overall_score", d.get("score", d.get("health_score", -1)))
-    return r.status_code == 200 and score >= 0 and score <= 100, f"score={score}"
+    return r.status_code == 200 and score >= 0 and score <= 100, f"score={score}, status={r.status_code}"
 test("Agents", "Dhan: health-score", t_dhan_health)
 
 # Niveshak
 def t_niveshak_analyze():
-    r = requests.post(f"{API}/niveshak/analyze", json={"holdings": [{"fund": "HDFC Top 100", "value": 500000, "invested": 400000}]}, timeout=10)
-    # May return 422 if request model expects different fields — just check status
-    return r.status_code in [200, 422], f"status={r.status_code}, keys={list(r.json().keys())[:5]}"
+    # No /niveshak/analyze endpoint; use /niveshak/risk-metrics instead
+    r = requests.post(f"{API}/niveshak/risk-metrics", json={"nav_data": [100, 102, 105, 103, 108, 110]}, timeout=10)
+    return r.status_code == 200 and len(r.json()) > 0, f"status={r.status_code}, keys={list(r.json().keys())[:5]}"
 test("Agents", "Niveshak: portfolio analyze", t_niveshak_analyze)
 
 # Vidhi
@@ -353,8 +353,8 @@ def t_stcg_15():
 test("Logic", "STCG = 15% of gains", t_stcg_15)
 
 def t_health_range():
-    # Use 'income' not 'monthly_income'
-    r = requests.post(f"{API}/dhan/health-score", json={"income": 50000, "monthly_expenses": 48000, "savings": 10000, "debt": 1000000, "investments": 0, "insurance": False, "emergency_fund": 0, "age": 25}, timeout=10)
+    # HealthRequest: income, expenses, monthly_savings, monthly_investments, debt, insurance_coverage
+    r = requests.post(f"{API}/dhan/health-score", json={"income": 50000, "expenses": 48000, "monthly_savings": 0, "monthly_investments": 0, "debt": 1000000, "insurance_coverage": 0}, timeout=10)
     d = r.json()
     score = d.get("overall_score", d.get("score", d.get("health_score", -1)))
     return r.status_code == 200 and score >= 0 and score <= 100, f"Bad finances → score={score}"

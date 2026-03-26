@@ -23,7 +23,7 @@ export default function DhanPage() {
     setFormData(prev => ({ ...prev, [field]: parseFloat(value) || 0 }))
   }
 
-  const calculateHealthScore = () => {
+  const calculateHealthScore = async () => {
     setCalculating(true)
     try {
       const { monthlyIncome, monthlyExpenses, emergencyFund, totalDebt, investments, age } = formData
@@ -90,6 +90,25 @@ export default function DhanPage() {
           age: Math.min(20, Math.floor(actualMultiple / (age * 0.005))),
         }
       })
+
+      // Auto-save to DB if user is logged in
+      try {
+        const stored = localStorage.getItem('user')
+        if (stored) {
+          const user = JSON.parse(stored)
+          await fetch('/api/save/health', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: user.id,
+              overallScore: Math.min(100, score),
+              emergencyFund: formData.emergencyFund,
+              savingsRate: savingsRate / 100,
+              debtToIncome: debtToIncome / 100,
+            }),
+          })
+        }
+      } catch (e) { /* silent save */ }
     } finally {
       setCalculating(false)
     }

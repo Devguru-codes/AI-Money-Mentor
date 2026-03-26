@@ -284,11 +284,27 @@ async def get_sebi_regulations():
 # ============ DHAN SARTHI (Coordinator) ============
 @app.post("/dhan-sarthi/route")
 async def route_query(request: Dict[str, Any]):
-    """Route query to appropriate agent"""
+    """Route query to appropriate agent with optional conversation context"""
     from agents.dhan_sarthi.coordinator import DhanSarthiCoordinator, AgentType
     coordinator = DhanSarthiCoordinator()
     query = request.get("query", "")
+    context = request.get("context", [])  # Recent chat messages from frontend
+    
     result = coordinator.parse_query(query)
+    
+    # Extract last agent from context for follow-up routing
+    last_agent = None
+    last_topic = None
+    if context and isinstance(context, list):
+        for msg in reversed(context):
+            if msg.get("agent") and msg["agent"] != "dhan-sarthi":
+                last_agent = msg["agent"]
+                break
+        # Get last user message for topic summary
+        for msg in reversed(context):
+            if msg.get("role") == "user":
+                last_topic = msg.get("content", "")[:50]
+                break
     
     # If DhanSarthi handles it directly (greeting/help/thanks/explain)
     if result.primary_agent == AgentType.DHAN_SARTHI:
@@ -296,8 +312,24 @@ async def route_query(request: Dict[str, Any]):
                       for cap in coordinator.AGENTS.values() 
                       if cap.agent_type != AgentType.DHAN_SARTHI]
         
+        # Context-aware greeting responses
+        context_suffix = ""
+        if last_agent and last_topic:
+            agent_names = {
+                "karvid": "tax calculations",
+                "yojana": "retirement planning", 
+                "bazaar": "stock market data",
+                "dhan": "financial health",
+                "niveshak": "portfolio analysis",
+                "vidhi": "compliance queries",
+                "life-event": "life event planning",
+                "couple-planner": "couple finance planning"
+            }
+            topic_name = agent_names.get(last_agent, last_agent)
+            context_suffix = f"\n\nLast time we discussed {topic_name}. Would you like to continue with that, or try something new?"
+        
         responses = {
-            "greeting": "Namaste! I'm DhanSarthi, your AI Money Mentor. I coordinate a team of 8 specialist agents to help you with taxes, investments, retirement planning, and more. How can I help you today?",
+            "greeting": f"Namaste! I'm DhanSarthi, your AI Money Mentor. I coordinate a team of 8 specialist agents to help you with taxes, investments, retirement planning, and more. How can I help you today?{context_suffix}",
             "help": "I'm DhanSarthi, the brain of AI Money Mentor! Here's what my team can do:\n" + "\n".join(["- " + name for name in agent_list]) + "\nJust ask me anything financial and I'll route you to the right expert!",
             "thanks": "You're welcome! Happy to help with your financial journey. Feel free to ask me anything anytime. Dhanyavaad! 🙏",
             "explain": "I'm DhanSarthi, an AI-powered financial coordinator. I analyze your query and route it to the best specialist agent. Try asking about taxes, stocks, retirement, or financial health!",
@@ -311,8 +343,26 @@ async def route_query(request: Dict[str, Any]):
             "response": responses.get(result.intent, responses["greeting"]),
             "available_agents": agent_list,
             "suggestions": result.suggestions,
-            "processing_time_ms": result.processing_time_ms
+            "processing_time_ms": result.processing_time_ms,
+            "context_used": bool(context),
+            "last_agent": last_agent,
         }
+    
+    # For routed queries: if confidence is low and we have previous context, bias toward last agent
+    if result.confidence < 0.4 and last_agent:
+        agent_map = {
+            "karvid": AgentType.KARVID,
+            "yojana": AgentType.YOJANA,
+            "bazaar": AgentType.BAZAAR,
+            "dhan": AgentType.DHAN,
+            "niveshak": AgentType.NIVESHAK,
+            "vidhi": AgentType.VIDHI,
+            "life-event": AgentType.LIFE_EVENT,
+            "couple-planner": AgentType.COUPLE_PLANNER,
+        }
+        if last_agent in agent_map:
+            result.primary_agent = agent_map[last_agent]
+            result.confidence = 0.5  # Boosted by context
     
     return result
 

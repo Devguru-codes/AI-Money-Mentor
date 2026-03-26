@@ -47,13 +47,36 @@ export default function KarVidPage() {
         return
       }
       const data = await response.json()
+      const oldTax = data.tax_old || calculateOldRegime(formData)
+      const newTax = data.tax_new || calculateNewRegime(formData.grossIncome)
       setResult({
-        oldRegime: data.tax_old || calculateOldRegime(formData),
-        newRegime: data.tax_new || calculateNewRegime(formData.grossIncome),
+        oldRegime: oldTax,
+        newRegime: newTax,
         recommendation: data.recommendation || "new",
-        savings: Math.abs((data.tax_new || calculateNewRegime(formData.grossIncome)) - (data.tax_old || calculateOldRegime(formData)).total),
+        savings: Math.abs(newTax - (oldTax?.total || oldTax)),
       })
       toast.success("Tax calculated successfully!")
+
+      // Auto-save to DB if user is logged in
+      try {
+        const stored = localStorage.getItem('user')
+        if (stored) {
+          const user = JSON.parse(stored)
+          await fetch('/api/save/tax', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: user.id,
+              financialYear: '2024-25',
+              regime: data.recommendation || 'new',
+              grossIncome: formData.grossIncome,
+              deductions80C: formData.deductions80C,
+              deductions80D: formData.deductions80D,
+              taxPayable: newTax,
+            }),
+          })
+        }
+      } catch (e) { /* silent save */ }
     } catch (error) {
       toast.error("Backend is offline. Please ensure the FastAPI server is running.")
     } finally {

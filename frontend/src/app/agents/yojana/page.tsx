@@ -47,15 +47,35 @@ export default function YojanaPage() {
         return
       }
       const data = await response.json()
-      setResult({
+      const fireResult = {
         fireNumber: data.fire_number || calculateFireNumber(formData.monthlyExpenses),
         inflationAdjusted: data.inflation_adjusted || calculateInflationAdjusted(formData),
         monthlySIP: data.monthly_sip || calculateMonthlySIP(formData),
         yearsToRetire: formData.retirementAge - formData.currentAge,
         currentSavings: formData.currentSavings,
         futureValueOfCurrent: data.future_value || calculateFutureValue(formData),
-      })
+      }
+      setResult(fireResult)
       toast.success("FIRE number calculated!")
+
+      // Auto-save to DB if user is logged in
+      try {
+        const stored = localStorage.getItem('user')
+        if (stored) {
+          const user = JSON.parse(stored)
+          await fetch('/api/save/fire', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: user.id,
+              targetCorpus: fireResult.inflationAdjusted,
+              monthlyExpenses: formData.monthlyExpenses,
+              targetYears: fireResult.yearsToRetire,
+              monthlySIP: fireResult.monthlySIP,
+            }),
+          })
+        }
+      } catch (e) { /* silent save */ }
     } catch (error) {
       toast.error("Backend is offline. Please ensure the FastAPI server is running.")
     } finally {

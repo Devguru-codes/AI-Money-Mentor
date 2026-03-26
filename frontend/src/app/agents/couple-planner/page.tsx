@@ -1,323 +1,207 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Send, Loader2 } from 'lucide-react'
+import { parseMarkdown } from '@/lib/markdown'
+
+interface Message {
+  id: string
+  role: "user" | "assistant"
+  content: string
+}
 
 export default function CouplePlannerPage() {
   // Person 1
-  const [person1Name, setPerson1Name] = useState('Person 1')
-  const [person1Income, setPerson1Income] = useState(0)
-  const [person1Expenses, setPerson1Expenses] = useState(0)
-  const [person1Savings, setPerson1Savings] = useState(0)
-  const [person1Debt, setPerson1Debt] = useState(0)
+  const [person1Name, setPerson1Name] = useState('Partner 1')
+  const [person1Income, setPerson1Income] = useState(50000)
+  const [person1Expenses, setPerson1Expenses] = useState(30000)
 
   // Person 2
-  const [person2Name, setPerson2Name] = useState('Person 2')
-  const [person2Income, setPerson2Income] = useState(0)
-  const [person2Expenses, setPerson2Expenses] = useState(0)
-  const [person2Savings, setPerson2Savings] = useState(0)
-  const [person2Debt, setPerson2Debt] = useState(0)
+  const [person2Name, setPerson2Name] = useState('Partner 2')
+  const [person2Income, setPerson2Income] = useState(50000)
+  const [person2Expenses, setPerson2Expenses] = useState(30000)
 
-  // Shared goals
-  const [goals, setGoals] = useState([
-    { name: 'Home Purchase', target_amount: 5000000, years: 5, priority: 1 },
-    { name: 'Vacation', target_amount: 200000, years: 2, priority: 3 },
-  ])
+  // AI Chat state
+  const [messages, setMessages] = useState<Message[]>([{
+    id: "init",
+    role: "assistant",
+    content: "I am the Couple's Finance Planner. Fill out the joint income form or ask me directly to help plan your shared finances, budgets, and couples' SIPs!",
+  }])
+  const [input, setInput] = useState("")
+  const [chatLoading, setChatLoading] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<any>(null)
-  const [budgetResult, setBudgetResult] = useState<any>(null)
-  const [error, setError] = useState<string | null>(null)
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
 
-  const calculateFinances = async () => {
-    setLoading(true)
-    setError(null)
+  const handleSendMessage = async (customQuery?: string) => {
+    const query = customQuery || input.trim()
+    if (!query || chatLoading) return
+
+    if (!customQuery) setInput("")
+    setMessages(prev => [...prev, { id: Date.now().toString(), role: "user", content: query }])
+    setChatLoading(true)
+
     try {
-      const response = await fetch('/api/couple-planner', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const userStr = localStorage.getItem('user')
+      const userId = userStr ? JSON.parse(userStr).id : "anonymous"
+
+      const response = await fetch("/api/bridge/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: 'finances',
-          person1_name: person1Name,
-          person1_income: person1Income,
-          person2_name: person2Name,
-          person2_income: person2Income,
+          message: query,
+          user_id: userId,
+          agent_id: "couple-planner"
         }),
       })
-      const data = await response.json()
-      if (data.error) {
-        setError(data.error)
+
+      if (response.ok) {
+        const data = await response.json()
+        setMessages(prev => [...prev, {
+          id: String(Date.now() + 1),
+          role: "assistant",
+          content: data.response || "I encountered an error analyzing that."
+        }])
       } else {
-        setResult(data)
+        setMessages(prev => [...prev, {
+          id: String(Date.now() + 1),
+          role: "assistant",
+          content: "Sorry, the AI planner is offline."
+        }])
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to calculate')
+    } catch (e) {
+      setMessages(prev => [...prev, {
+        id: String(Date.now() + 1),
+        role: "assistant",
+        content: "Error connecting to the AI agent."
+      }])
     } finally {
-      setLoading(false)
+      setChatLoading(false)
     }
   }
 
-  const calculateBudget = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const response = await fetch('/api/couple-planner', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'budget',
-          person1_name: person1Name,
-          person1_income: person1Income,
-          person1_expenses: person1Expenses,
-          person1_savings: person1Savings,
-          person2_name: person2Name,
-          person2_income: person2Income,
-          person2_expenses: person2Expenses,
-          person2_savings: person2Savings,
-        }),
-      })
-      const data = await response.json()
-      if (data.error) {
-        setError(data.error)
-      } else {
-        setBudgetResult(data)
-      }
-    } catch (err: any) {
-      setError(err.message || 'Failed to calculate')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0,
-    }).format(amount)
+  const handleCreatePlan = () => {
+    const query = `Create a joint financial plan for ${person1Name} (Income: ₹${person1Income}, Expenses: ₹${person1Expenses}) and ${person2Name} (Income: ₹${person2Income}, Expenses: ₹${person2Expenses}). How should we split our rent and savings organically?`
+    handleSendMessage(query)
   }
 
   return (
     <div className="container mx-auto p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">Couple&apos;s Money Planner</h1>
+        <h1 className="text-3xl font-bold flex items-center gap-3">
+          💑 Couple&apos;s AI Planner
+          <Badge className="bg-purple-500 hover:bg-purple-600 text-white border-0">AI Agent Active</Badge>
+        </h1>
         <p className="text-muted-foreground mt-2">
-          Plan your finances together - shared goals, budget splits, and combined planning
+          Plan your finances together using real LLM-powered dynamic analysis.
         </p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Person 1 */}
-        <Card>
-          <CardHeader>
-            <CardTitle>👤 {person1Name}</CardTitle>
-            <CardDescription>First person&apos;s finances</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Name</Label>
-              <Input value={person1Name} onChange={(e) => setPerson1Name(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Monthly Income (₹)</Label>
-              <Input
-                type="number"
-                value={person1Income}
-                onChange={(e) => setPerson1Income(parseFloat(e.target.value) || 0)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Monthly Expenses (₹)</Label>
-              <Input
-                type="number"
-                value={person1Expenses}
-                onChange={(e) => setPerson1Expenses(parseFloat(e.target.value) || 0)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Current Savings (₹)</Label>
-              <Input
-                type="number"
-                value={person1Savings}
-                onChange={(e) => setPerson1Savings(parseFloat(e.target.value) || 0)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Debt (₹)</Label>
-              <Input
-                type="number"
-                value={person1Debt}
-                onChange={(e) => setPerson1Debt(parseFloat(e.target.value) || 0)}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Person 2 */}
-        <Card>
-          <CardHeader>
-            <CardTitle>👤 {person2Name}</CardTitle>
-            <CardDescription>Second person&apos;s finances</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Name</Label>
-              <Input value={person2Name} onChange={(e) => setPerson2Name(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Monthly Income (₹)</Label>
-              <Input
-                type="number"
-                value={person2Income}
-                onChange={(e) => setPerson2Income(parseFloat(e.target.value) || 0)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Monthly Expenses (₹)</Label>
-              <Input
-                type="number"
-                value={person2Expenses}
-                onChange={(e) => setPerson2Expenses(parseFloat(e.target.value) || 0)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Current Savings (₹)</Label>
-              <Input
-                type="number"
-                value={person2Savings}
-                onChange={(e) => setPerson2Savings(parseFloat(e.target.value) || 0)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Debt (₹)</Label>
-              <Input
-                type="number"
-                value={person2Debt}
-                onChange={(e) => setPerson2Debt(parseFloat(e.target.value) || 0)}
-              />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Actions */}
-      <div className="flex gap-4 mt-6">
-        <Button onClick={calculateFinances} disabled={loading}>
-          {loading ? 'Calculating...' : 'Calculate Combined Finances'}
-        </Button>
-        <Button variant="outline" onClick={calculateBudget} disabled={loading}>
-          Create Budget Plan
-        </Button>
-      </div>
-
-      {error && (
-        <Alert variant="destructive" className="mt-4">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      {/* Results */}
-      {result && (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Combined Finances</CardTitle>
-            <CardDescription>Your financial snapshot as a couple</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
-                <p className="text-sm text-muted-foreground">Combined Income</p>
-                <p className="text-2xl font-bold text-green-600">{formatCurrency(result.combined_income)}</p>
+        {/* Form Column */}
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>👤 {person1Name}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Name</Label>
+                <Input value={person1Name} onChange={(e) => setPerson1Name(e.target.value)} />
               </div>
-              <div className="p-4 bg-red-50 dark:bg-red-950 rounded-lg">
-                <p className="text-sm text-muted-foreground">Combined Expenses</p>
-                <p className="text-2xl font-bold text-red-600">{formatCurrency(result.combined_expenses)}</p>
-              </div>
-              <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
-                <p className="text-sm text-muted-foreground">Combined Savings</p>
-                <p className="text-2xl font-bold text-blue-600">{formatCurrency(result.combined_savings)}</p>
-              </div>
-              <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
-                <p className="text-sm text-muted-foreground">Net Worth</p>
-                <p className="text-2xl font-bold text-purple-600">{formatCurrency(result.net_worth)}</p>
-              </div>
-            </div>
-
-            <div className="mt-4 p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground">Income Split</p>
-              <div className="flex gap-4 mt-2">
-                <Badge variant="secondary">{person1Name}: {(result.income_ratio[person1Name] * 100).toFixed(1)}%</Badge>
-                <Badge variant="secondary">{person2Name}: {(result.income_ratio[person2Name] * 100).toFixed(1)}%</Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {budgetResult && (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Budget Plan (50/30/20)</CardTitle>
-            <CardDescription>Recommended budget allocation</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
-                <p className="text-sm text-muted-foreground">Needs (50%)</p>
-                <p className="text-2xl font-bold text-blue-600">{formatCurrency(budgetResult.summary.needs)}</p>
-              </div>
-              <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
-                <p className="text-sm text-muted-foreground">Wants (30%)</p>
-                <p className="text-2xl font-bold text-purple-600">{formatCurrency(budgetResult.summary.wants)}</p>
-              </div>
-              <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
-                <p className="text-sm text-muted-foreground">Savings (20%)</p>
-                <p className="text-2xl font-bold text-green-600">{formatCurrency(budgetResult.summary.savings)}</p>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <p className="font-semibold">Recommendations</p>
-              <ul className="space-y-1">
-                {budgetResult.recommendations?.map((rec: string, idx: number) => (
-                  <li key={idx} className="text-sm text-muted-foreground">
-                    • {rec}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Shared Goals */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle>🎯 Shared Goals</CardTitle>
-          <CardDescription>Plan for shared financial goals</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {goals.map((goal, idx) => (
-              <div key={idx} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                <div>
-                  <p className="font-medium">{goal.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Target: {formatCurrency(goal.target_amount)} | Years: {goal.years}
-                  </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Income (₹)</Label>
+                  <Input type="number" value={person1Income} onChange={(e) => setPerson1Income(parseFloat(e.target.value) || 0)} />
                 </div>
-                <Badge>Priority {goal.priority}</Badge>
+                <div className="space-y-2">
+                  <Label>Expenses (₹)</Label>
+                  <Input type="number" value={person1Expenses} onChange={(e) => setPerson1Expenses(parseFloat(e.target.value) || 0)} />
+                </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>👤 {person2Name}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Name</Label>
+                <Input value={person2Name} onChange={(e) => setPerson2Name(e.target.value)} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Income (₹)</Label>
+                  <Input type="number" value={person2Income} onChange={(e) => setPerson2Income(parseFloat(e.target.value) || 0)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Expenses (₹)</Label>
+                  <Input type="number" value={person2Expenses} onChange={(e) => setPerson2Expenses(parseFloat(e.target.value) || 0)} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Button onClick={handleCreatePlan} disabled={chatLoading} className="w-full h-12 text-lg">
+            {chatLoading ? "Analyzing..." : "Generate Joint AI Plan"}
+          </Button>
+        </div>
+
+        {/* AI Chat Sidebar */}
+        <div>
+          <Card className="h-full flex flex-col border-purple-200/50 min-h-[600px]">
+            <CardHeader className="bg-purple-50/50 border-b">
+              <CardTitle>Plan Discussion</CardTitle>
+              <CardDescription>Chat directly with the Joint Planning AI</CardDescription>
+            </CardHeader>
+            <CardContent className="flex-1 flex flex-col p-0">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[500px]">
+                {messages.map((msg) => (
+                  <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[85%] rounded-xl p-3 ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                      <div className="whitespace-pre-wrap text-sm">{parseMarkdown(msg.content)}</div>
+                    </div>
+                  </div>
+                ))}
+                {chatLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-muted rounded-xl p-3 flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span className="text-sm">Planner is writing...</span>
+                    </div>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+              
+              <div className="p-4 border-t bg-muted/30">
+                <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex gap-2">
+                  <Input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Ask about joint accounts, splits, or shared goals..."
+                    disabled={chatLoading}
+                    className="flex-1"
+                  />
+                  <Button type="submit" disabled={chatLoading || !input.trim()}>
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </form>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   )
 }

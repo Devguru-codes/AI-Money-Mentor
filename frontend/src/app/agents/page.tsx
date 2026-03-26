@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Brain, BarChart3, Calculator, Target, TrendingUp, Shield, Scale, ArrowRight, Sparkles, Loader2 } from "lucide-react"
+import { Brain, BarChart3, Calculator, Target, TrendingUp, Shield, Scale, ArrowRight, Sparkles, Loader2, CalendarClock, Heart } from "lucide-react"
 
 const agents = [
   {
@@ -78,6 +78,26 @@ const agents = [
     color: "from-gray-500 to-slate-600",
     href: "/agents/vidhi",
     icon: Scale,
+  },
+  {
+    id: "life-event",
+    name: "Life Event Planner",
+    title: "Life Events",
+    description: "Plan your finances for major milestones like marriage, education, and purchasing a home using AI.",
+    features: ["Marriage Budgeting", "Education Corpus", "Home Buying ROI", "AI Generation"],
+    color: "from-teal-500 to-emerald-600",
+    href: "/agents/life-event",
+    icon: CalendarClock,
+  },
+  {
+    id: "couple-planner",
+    name: "Couple's Planner",
+    title: "Joint Finances",
+    description: "Plan your finances together, manage joint budgets, and achieve shared financial goals effortlessly.",
+    features: ["Split Expenses", "Joint Goal Tracking", "Debt Planning", "Shared Decisions"],
+    color: "from-rose-400 to-pink-500",
+    href: "/agents/couple-planner",
+    icon: Heart,
   },
 ]
 

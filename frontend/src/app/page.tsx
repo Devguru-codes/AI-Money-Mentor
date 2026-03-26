@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Loader2, Brain, BarChart3, Calculator, Target, TrendingUp, Shield, Scale, ArrowRight, Sparkles, Wallet, PiggyBank, TrendingDown, Activity } from "lucide-react"
+import { Loader2, Brain, BarChart3, Calculator, Target, TrendingUp, Shield, Scale, ArrowRight, Sparkles, Wallet, PiggyBank, TrendingDown, Activity, Heart, CalendarClock } from "lucide-react"
 
 const agents = [
   {
@@ -78,6 +78,26 @@ const agents = [
     href: "/agents/vidhi",
     icon: Scale,
   },
+  {
+    id: "life-event",
+    name: "Life Event Planner",
+    emoji: "🎉",
+    title: "Life Events",
+    description: "Plan your finances for major milestones like marriage, education, and purchasing a home using AI",
+    color: "from-teal-500 to-emerald-600",
+    href: "/agents/life-event",
+    icon: CalendarClock,
+  },
+  {
+    id: "couple-planner",
+    name: "Couple's Planner",
+    emoji: "💑",
+    title: "Joint Finances",
+    description: "Plan your finances together, manage joint budgets, and achieve shared financial goals",
+    color: "from-rose-400 to-pink-500",
+    href: "/agents/couple-planner",
+    icon: Heart,
+  },
 ]
 
 export default function Home() {
@@ -142,8 +162,8 @@ export default function Home() {
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
-            <Link href="/login">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+            <Link href={user ? "/profile" : "/login"}>
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-indigo-600 transition-colors">
                 {user ? "View Profile" : "Get Started"}
               </Button>
             </Link>

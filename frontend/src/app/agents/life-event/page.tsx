@@ -1,13 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Send, Loader2 } from 'lucide-react'
+import { parseMarkdown } from '@/lib/markdown'
 
 const EVENT_TYPES = [
   { id: 'marriage', name: 'Marriage', icon: '💒', description: 'Wedding expenses' },
@@ -22,213 +23,211 @@ const EVENT_TYPES = [
   { id: 'parent_care', name: 'Parent Care', icon: '👨‍👩‍👧', description: 'Medical & care expenses' },
 ]
 
+interface Message {
+  id: string
+  role: "user" | "assistant"
+  content: string
+}
+
 export default function LifeEventPage() {
   const [eventType, setEventType] = useState('marriage')
   const [yearsUntil, setYearsUntil] = useState(5)
-  const [currentCorpus, setCurrentCorpus] = useState(0)
-  const [monthlyInvestment, setMonthlyInvestment] = useState(0)
-  const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<any>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [currentCorpus, setCurrentCorpus] = useState(100000)
+  const [monthlyInvestment, setMonthlyInvestment] = useState(15000)
 
-  const calculatePlan = async () => {
-    setLoading(true)
-    setError(null)
+  // AI Chat state
+  const [messages, setMessages] = useState<Message[]>([{
+    id: "init",
+    role: "assistant",
+    content: "I am your AI Life Event Planner. Select an event and fill the numbers to generate a structured AI financial plan, or ask me specific questions!",
+  }])
+  const [input, setInput] = useState("")
+  const [chatLoading, setChatLoading] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
+
+  const handleSendMessage = async (customQuery?: string) => {
+    const query = customQuery || input.trim()
+    if (!query || chatLoading) return
+
+    if (!customQuery) setInput("")
+    setMessages(prev => [...prev, { id: Date.now().toString(), role: "user", content: query }])
+    setChatLoading(true)
+
     try {
-      const response = await fetch('/api/life-event', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const userStr = localStorage.getItem('user')
+      const userId = userStr ? JSON.parse(userStr).id : "anonymous"
+
+      const response = await fetch("/api/bridge/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          event_type: eventType,
-          years_until: yearsUntil,
-          current_corpus: currentCorpus,
-          monthly_investment: monthlyInvestment,
+          message: query,
+          user_id: userId,
+          agent_id: "life-event"
         }),
       })
-      const data = await response.json()
-      if (data.error) {
-        setError(data.error)
+
+      if (response.ok) {
+        const data = await response.json()
+        setMessages(prev => [...prev, {
+          id: String(Date.now() + 1),
+          role: "assistant",
+          content: data.response || "I encountered an error analyzing that."
+        }])
       } else {
-        setResult(data)
+        setMessages(prev => [...prev, {
+          id: String(Date.now() + 1),
+          role: "assistant",
+          content: "Sorry, the AI planner is offline."
+        }])
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to calculate')
+    } catch (e) {
+      setMessages(prev => [...prev, {
+        id: String(Date.now() + 1),
+        role: "assistant",
+        content: "Error connecting to the AI agent."
+      }])
     } finally {
-      setLoading(false)
+      setChatLoading(false)
     }
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0,
-    }).format(amount)
+  const handleCreatePlan = () => {
+    const eventName = EVENT_TYPES.find(e => e.id === eventType)?.name || eventType
+    const query = `Create a detailed financial plan for my upcoming ${eventName} in ${yearsUntil} years. I currently have ₹${currentCorpus} saved and can invest ₹${monthlyInvestment} per month. Evaluate my shortfall and suggest asset allocations.`
+    handleSendMessage(query)
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-6 pb-12">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">Life Event Financial Advisor</h1>
+        <h1 className="text-3xl font-bold flex items-center gap-3">
+          Life Event AI Advisor
+          <Badge className="bg-purple-500 hover:bg-purple-600 text-white border-0">AI Agent Active</Badge>
+        </h1>
         <p className="text-muted-foreground mt-2">
-          Plan your finances for major life events like marriage, children, education, and more
+          Plan your finances for major life events dynamically with generative AI.
         </p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Input Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Plan Your Life Event</CardTitle>
-            <CardDescription>Select an event and timeline to get personalized financial plan</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Life Event</Label>
-              <Select value={eventType} onValueChange={(v) => v && setEventType(v)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {EVENT_TYPES.map((event) => (
-                    <SelectItem key={event.id} value={event.id}>
-                      {event.icon} {event.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Plan Your Life Event</CardTitle>
+              <CardDescription>Select an event and timeline to get personalized AI plan</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Life Event</Label>
+                <Select value={eventType} onValueChange={(v) => v && setEventType(v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EVENT_TYPES.map((event) => (
+                      <SelectItem key={event.id} value={event.id}>
+                        <span className="flex items-center gap-2">
+                          <span>{event.icon}</span>
+                          <span>{event.name}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="years">Years Until Event</Label>
-              <Input
-                id="years"
-                type="number"
-                value={yearsUntil}
-                onChange={(e) => setYearsUntil(parseInt(e.target.value) || 0)}
-                min={1}
-                max={40}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="years">Years Until Event</Label>
+                <Input
+                  id="years"
+                  type="number"
+                  value={yearsUntil}
+                  onChange={(e) => setYearsUntil(parseInt(e.target.value) || 0)}
+                  min={1}
+                  max={40}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="corpus">Current Corpus (₹)</Label>
-              <Input
-                id="corpus"
-                type="number"
-                value={currentCorpus}
-                onChange={(e) => setCurrentCorpus(parseFloat(e.target.value) || 0)}
-                min={0}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="corpus">Current Corpus (₹)</Label>
+                <Input
+                  id="corpus"
+                  type="number"
+                  value={currentCorpus}
+                  onChange={(e) => setCurrentCorpus(parseFloat(e.target.value) || 0)}
+                  min={0}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="monthly">Monthly Investment (₹)</Label>
-              <Input
-                id="monthly"
-                type="number"
-                value={monthlyInvestment}
-                onChange={(e) => setMonthlyInvestment(parseFloat(e.target.value) || 0)}
-                min={0}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="monthly">Monthly Investment (₹)</Label>
+                <Input
+                  id="monthly"
+                  type="number"
+                  value={monthlyInvestment}
+                  onChange={(e) => setMonthlyInvestment(parseFloat(e.target.value) || 0)}
+                  min={0}
+                />
+              </div>
 
-            <Button onClick={calculatePlan} disabled={loading} className="w-full">
-              {loading ? 'Calculating...' : 'Calculate Plan'}
-            </Button>
-          </CardContent>
-        </Card>
+              <Button onClick={handleCreatePlan} disabled={chatLoading} className="w-full h-12 text-lg">
+                {chatLoading ? 'Generating AI Plan...' : 'Generate AI Plan'}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* Result Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Financial Plan</CardTitle>
-            <CardDescription>Your personalized savings plan</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {error && (
-              <Alert variant="destructive" className="mb-4">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            {result ? (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-muted rounded-lg">
-                    <p className="text-sm text-muted-foreground">Current Cost</p>
-                    <p className="text-2xl font-bold">{formatCurrency(result.current_cost)}</p>
+        {/* AI Chat Sidebar */}
+        <div>
+          <Card className="h-full flex flex-col border-purple-200/50 min-h-[500px]">
+            <CardHeader className="bg-purple-50/50 border-b">
+              <CardTitle>AI Goal Discussion</CardTitle>
+              <CardDescription>Chat directly with your Life Event AI</CardDescription>
+            </CardHeader>
+            <CardContent className="flex-1 flex flex-col p-0">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[500px]">
+                {messages.map((msg) => (
+                  <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[85%] rounded-xl p-3 ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                      <div className="whitespace-pre-wrap text-sm">{parseMarkdown(msg.content)}</div>
+                    </div>
                   </div>
-                  <div className="p-4 bg-muted rounded-lg">
-                    <p className="text-sm text-muted-foreground">Future Cost (Inflation Adjusted)</p>
-                    <p className="text-2xl font-bold">{formatCurrency(result.future_cost)}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Monthly SIP Needed</p>
-                    <p className="text-2xl font-bold text-blue-600">{formatCurrency(result.sip_needed)}</p>
-                  </div>
-                  <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Lumpsum Needed Today</p>
-                    <p className="text-2xl font-bold text-green-600">{formatCurrency(result.lumpsum_needed_today)}</p>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground">Status</p>
-                  <Badge variant={result.is_achievable ? 'default' : 'destructive'}>
-                    {result.is_achievable ? '✅ On Track' : '⚠️ Shortfall: ' + formatCurrency(result.shortfall)}
-                  </Badge>
-                </div>
-
-                {result.recommendations && result.recommendations.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="font-semibold">Recommendations</p>
-                    <ul className="space-y-1">
-                      {result.recommendations.map((rec: string, idx: number) => (
-                        <li key={idx} className="text-sm text-muted-foreground">
-                          • {rec}
-                        </li>
-                      ))}
-                    </ul>
+                ))}
+                {chatLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-muted rounded-xl p-3 flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span className="text-sm">Analyzing timeline and shortfall...</span>
+                    </div>
                   </div>
                 )}
+                <div ref={messagesEndRef} />
               </div>
-            ) : (
-              <p className="text-muted-foreground text-center py-8">
-                Enter details and click Calculate to see your plan
-              </p>
-            )}
-          </CardContent>
-        </Card>
+              
+              <div className="p-4 border-t bg-muted/30">
+                <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex gap-2">
+                  <Input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Ask about inflation, SIP step-ups, or debt..."
+                    disabled={chatLoading}
+                    className="flex-1"
+                  />
+                  <Button type="submit" disabled={chatLoading || !input.trim()}>
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </form>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-
-      {/* Event Types Overview */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle>Available Life Events</CardTitle>
-          <CardDescription>Plan for any major financial milestone</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {EVENT_TYPES.map((event) => (
-              <div
-                key={event.id}
-                className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                  eventType === event.id ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'
-                }`}
-                onClick={() => setEventType(event.id)}
-              >
-                <div className="text-2xl mb-1">{event.icon}</div>
-                <p className="font-medium">{event.name}</p>
-                <p className="text-xs opacity-80">{event.description}</p>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }

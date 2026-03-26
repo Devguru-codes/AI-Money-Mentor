@@ -88,7 +88,7 @@
 | **AI Orchestration** | OpenClaw 2026.3 | Multi-agent swarm coordination |
 | **LLM Backend** | Ollama (local), GLM-5 Cloud | AI inference for agent responses |
 | **Bots** | python-telegram-bot | Telegram integration |
-| **Testing** | Jest, E2E Python tests | 16/16 unit + 16/16 integration tests |
+| **Testing** | Jest, E2E Python tests | 26 deep + 25 routing = 51/51 tests passing |
 
 ---
 
@@ -226,13 +226,12 @@ KARVID_BOT_TOKEN=your_token
 ## 🧪 Testing
 
 ```bash
-# Unit Tests (Jest) — 16/16
-cd frontend
-npx jest
-
-# E2E Integration Tests — 16/16
+# Deep Agent Tests — 26/26
 cd backend
-python3 tests/e2e_test.py
+python3 tests/deep_agent_test.py
+
+# Greeting & Routing Tests — 25/25
+python3 tests/greeting_test.py
 
 # Build Verification
 cd frontend

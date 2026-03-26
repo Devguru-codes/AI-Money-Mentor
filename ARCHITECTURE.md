@@ -2,382 +2,227 @@
 
 ## Overview
 
-AI Money Mentor is a personal finance platform for Indian investors, combining AI-powered advice with precise calculation tools. It uses a hybrid architecture where AI agents handle understanding and explanation, while Python scripts handle calculations.
+AI Money Mentor is India's first multi-agent personal finance platform for Indian investors. It combines a **Next.js frontend**, a **FastAPI backend**, and an **OpenClaw multi-agent swarm** with 9 specialized AI agents. DhanSarthi ("The Brain") coordinates all queries, routing them to the right specialist agent.
 
 ---
 
 ## System Architecture
 
 ```
-+-----------------------------------------------------------------------------+
-|                              USER INTERFACES                                |
-+-----------------------------------------------------------------------------+
-|                                                                             |
-|  +---------------------+    +---------------------+    +-----------------+ |
-|  |   Streamlit Web     |    |   Telegram Bots     |    |   Future:       | |
-|  |   (Port 8501)       |    |   (7 Bot Accounts)  |    |   Mobile App    | |
-|  +---------------------+    +---------------------+    +-----------------+ |
-|            |                         │                            |        |
-+------------+-------------------------+----------------------------+--------+
-             |                         |                            |
-             v                         v                            v
-+-----------------------------------------------------------------------------+
-|                           CHAT BRIDGE API                                   |
-|                           (FastAPI, Port 8000)                              |
-+-----------------------------------------------------------------------------+
-|                                                                             |
-|  +---------------------------------------------------------------------+   |
-|  |  /bridge/chat                                                        |   |
-|  |  - Receives: message, user_id, session_id, agent_id                 |   |
-|  |  - Stores: SQLite chat history                                       |   |
-|  |  - Routes: OpenClaw CLI                                              |   |
-|  +---------------------------------------------------------------------+   |
-|                                                                             |
-|  +---------------------------------------------------------------------+   |
-|  |  Direct Calculator Endpoints                                        |   |
-|  |  - POST /karvid/calculate-tax                                       |   |
-|  |  - POST /yojana/fire                                                |   |
-|  |  - POST /bazaar/stock-quote                                         |   |
-|  |  - POST /dhan/health-score                                          |   |
-|  +---------------------------------------------------------------------+   |
-|                                                                             |
-+-----------------------------------------------------------------------------+
-             |
-             | HTTP / subprocess
-             v
-+-----------------------------------------------------------------------------+
-|                        OPENCLAW GATEWAY (Port 18789)                        |
-|                        AI Agent Orchestrator                                |
-+-----------------------------------------------------------------------------+
-|                                                                             |
-|  +---------------------------------------------------------------------+   |
-|  |  dhan-sarthi (Coordinator)                                          |   |
-|  |  - Routes queries to appropriate agent                              |   |
-|  |  - Handles multi-agent queries                                      |   |
-|  |  - Telegram: @etgenaidhansarthibot                                  |   |
-|  +---------------------------------------------------------------------+   |
-|                                                                             |
-|  +---------------+  +---------------+  +---------------+  +-------------+  |
-|  | karvid        |  | yojana        |  | bazaar        |  | dhan        |  |
-|  | (Tax)         |  | (FIRE)        |  | (Stocks)      |  | (Health)    |  |
-|  | @karvidbot    |  | @yojanabot    |  | @bazaarbot    |  | @dhanbot    |  |
-|  +---------------+  +---------------+  +---------------+  +-------------+  |
-|                                                                             |
-|  +---------------+  +---------------+                                       |
-|  | niveshak      |  | vidhi         |                                       |
-|  | (Portfolio)   |  | (Compliance)  |                                       |
-|  | @niveshakbot |  | @vidhibot      |                                       |
-|  +---------------+  +---------------+                                       |
-|                                                                             |
-|  Each agent has:                                                           |
-|  - SKILL.md: Instructions for using Python tools                           |
-|  - AGENTS.md: Agent personality and capabilities                           |
-|  - sessions/: Chat history storage                                        |                                                                             |
-+-----------------------------------------------------------------------------+
-             |
-             | Reads SKILL.md -> Uses exec() tool
-             v
-+-----------------------------------------------------------------------------+
-|                        PYTHON CALCULATION SCRIPTS                           |
-|                        (agents/*/scripts/)                                  |
-+-----------------------------------------------------------------------------+
-|                                                                             |
-|  +---------------------------------------------------------------------+   |
-|  |  agents/karvid/tax_calculator.py                                    |   |
-|  |  - Indian tax regimes (old/new)                                     |   |
-|  |  - Deductions (80C, 80D, 80CCD)                                     |   |
-|  |  - Capital gains                                                    |   |
-|  |  - Returns: JSON with tax breakdown                                 |   |
-|  +---------------------------------------------------------------------+   |
-|                                                                             |
-|  +---------------------------------------------------------------------+   |
-|  |  agents/yojana/fire_calculator.py                                   |   |
-|  |  - FIRE number calculation                                          |   |
-|  |  - Inflation-adjusted corpus                                        |   |
-|  |  - SIP recommendations                                              |   |
-|  |  - Returns: JSON with FIRE plan                                    |   |
-|  +---------------------------------------------------------------------+   |
-|                                                                             |
-|  +---------------------------------------------------------------------+   |
-|  |  agents/bazaar/stock_data.py                                        |   |
-|  |  - NSE/BSE stock quotes                                             |   |
-|  |  - Mock data fallback                                               |   |
-|  |  - Returns: JSON with stock data                                    |   |
-|  +---------------------------------------------------------------------+   |
-|                                                                             |
-|  +---------------------------------------------------------------------+   |
-|  |  agents/dhan/health_score.py                                        |   |
-|  |  - Financial health score (0-100)                                   |   |
-|  |  - Savings rate, emergency fund                                     |   |
-|  |  - Debt-to-income ratio                                             |   |
-|  |  - Returns: JSON with score breakdown                               |   |
-|  +---------------------------------------------------------------------+   |
-|                                                                             |
-|  +---------------------------------------------------------------------+   |
-|  |  agents/niveshak/cas_parser.py + portfolio_analyzer.py              |   |
-|  |  - CAS statement parsing                                             |   |
-|  |  - XIRR calculation                                                 |   |
-|  |  - Portfolio analysis                                               |   |
-|  +---------------------------------------------------------------------+   |
-|                                                                             |
-|  +---------------------------------------------------------------------+   |
-|  |  agents/vidhi/compliance.py                                         |   |
-|  |  - SEBI compliance checks                                           |   |
-|  |  - Legal disclaimers                                                |   |
-|  +---------------------------------------------------------------------+   |
-|                                                                             |
-+-----------------------------------------------------------------------------+
+┌─────────────────────────────────────────────────────────────────┐
+│                      Next.js Frontend                           │
+│       Landing • 9 Agent Pages • Auth • Profile • Chat           │
+│                      (Port 3000)                                │
+│                                                                 │
+│  ┌──────────────────────┐  ┌──────────────────────────────────┐│
+│  │  Prisma + SQLite     │  │  Zustand Store (localStorage)   ││
+│  │  User, Chat, Tax,    │  │  user, theme, activeAgent       ││
+│  │  FIRE, Health        │  │                                  ││
+│  └──────────────────────┘  └──────────────────────────────────┘│
+└───────────────────────┬─────────────────────────────────────────┘
+                        │  BFF Proxy (/api/*)
+                        ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     FastAPI Backend (Port 8000)                  │
+│                                                                 │
+│     ┌─────────────────────────────────────────────────┐         │
+│     │          🧠 DhanSarthi (Coordinator)             │         │
+│     │   "The Brain" — keyword scoring + intent routing │         │
+│     │   Handles greetings, help, thanks, explain       │         │
+│     └──────┬──────┬──────┬──────┬──────┬──────┬───────┘         │
+│            │      │      │      │      │      │                 │
+│       ┌────▼─┐┌───▼──┐┌──▼───┐┌─▼────┐┌▼─────┐┌▼──────┐       │
+│       │KarVid││Yojana││Bazaar││ Dhan ││Nivesh││ Vidhi │       │
+│       │ 🧾   ││ 🎯   ││ 📈   ││ 💪   ││ 📊   ││ ⚖️    │       │
+│       │ Tax  ││ FIRE ││Stock ││Health││  MF  ││Legal │       │
+│       └──────┘└──────┘└──────┘└──────┘└──────┘└──────┘       │
+│       ┌──────────────────┐ ┌──────────────────┐                 │
+│       │ Life Event  🎉   │ │ Couple Planner 💑│                 │
+│       │ Marriage, Baby   │ │ Joint Finance    │                 │
+│       └──────────────────┘ └──────────────────┘                 │
+│                                                                 │
+│     20+ REST endpoints • Python calculation modules             │
+└──────────────────────┬──────────────────────────────────────────┘
+                       │
+            ┌──────────▼──────────┐
+            │  OpenClaw Gateway   │
+            │  (Agent Swarm)      │
+            │                     │
+            │  Ollama / GLM-5     │
+            │  (LLM Inference)    │
+            └─────────────────────┘
 ```
 
 ---
 
-## UI Structure (All Pages)
+## Request Flow
 
-Each Streamlit page follows this pattern:
+### 1. Chat Flow (Primary UX)
 
 ```
-+-----------------------------------------+
-|  PAGE HEADER                            |
-+-----------------------------------------+
-|                                         |
-|  AI CHAT SECTION (Always Visible)       |
-|  - st.chat_input()                      |
-|  - Connects to /bridge/chat             |
-|                                         |
-+-----------------------------------------+
-|                                         |
-|  CALCULATOR SECTION                      |
-|  - Number inputs                         |
-|  - Calculate button                      |
-|  - Results display                       |
-|                                         |
-+-----------------------------------------+
-|                                         |
-|  AI EXPLANATION (After Calculation)      |
-|  - Quick action buttons                  |
-|  - Custom question input                 |
-|                                         |
-+-----------------------------------------+
+User types: "Hello" or "Calculate tax for 15 lakhs"
+     │
+     ▼
+Next.js DhanSarthi Chat Page
+     │
+     │ POST /api/dhan-sarthi (BFF proxy)
+     ▼
+FastAPI /dhan-sarthi/route
+     │
+     ▼
+DhanSarthi Coordinator (coordinator.py)
+     │
+     ├─ Is it a greeting/help/thanks? → Return self-response (no agent delegation)
+     │
+     ├─ Has finance keywords? → Score all agents → Route to best match
+     │     │
+     │     ├─ "tax 15 lakhs" → KarVid (POST /karvid/calculate-tax)
+     │     ├─ "retire early"  → Yojana (POST /yojana/fire-number)
+     │     ├─ "RELIANCE price" → Bazaar (POST /bazaar/stock-quote)
+     │     ├─ "health score"  → Dhan (POST /dhan/health-score)
+     │     ├─ "married next yr" → Life Event (POST /life-event/plan)
+     │     └─ "joint budget"  → Couple Planner (POST /couple/plan)
+     │
+     ▼
+Frontend receives agent + data → generates formatted response
+     │
+     ├─ Displays in chat UI with agent badge
+     └─ Saves to Prisma DB (POST /api/save/chat)
+```
+
+### 2. Auth Flow
+
+```
+User enters email/telegramId
+     │
+     ├─ Sign Up → POST /api/auth/signup → Prisma user.create → localStorage
+     ├─ Login   → POST /api/auth/login  → Prisma user.findUnique → localStorage
+     └─ Update  → POST /api/auth/update → Prisma user.update → localStorage
 ```
 
 ---
 
-## Data Flow
-
-### 1. Streamlit Chat Flow (AI-First)
+## Database Schema (Prisma + SQLite)
 
 ```
-User types: "Calculate tax for 20 lakhs"
-     |
-     v
-Streamlit (st.chat_input)
-     |
-     | requests.post("http://127.0.0.1:8000/bridge/chat", json={message, agent_id})
-     v
-Chat Bridge API
-     |
-     | subprocess.run(['openclaw', 'agent', '--agent', 'dhan-sarthi', '--message', '...'])
-     v
-OpenClaw Gateway
-     |
-     | Routes to appropriate agent (dhan-sarthi -> karvid)
-     v
-KarVid Agent
-     |
-     | Reads SKILL.md: "Use exec to run tax_calculator.py"
-     | Extracts: income=2000000, regime="both"
-     | Runs: python3 -c "from tax_calculator import..."
-     v
-tax_calculator.py
-     |
-     | Returns JSON: {new_regime: {...}, old_regime: {...}}
-     v
-KarVid Agent
-     |
-     | Formats response with markdown tables
-     | Adds context, disclaimers
-     v
-User sees: "Your tax is Rs.2.78L (13.91% effective rate)"
+User
+├── id (UUID)
+├── telegramId? (unique)
+├── email? (unique)
+├── name, phone
+├── createdAt, updatedAt
+│
+├── Portfolio (1:1) — totalValue, xirr, sharpeRatio, holdings (JSON)
+├── TaxProfile[] — financialYear, regime, grossIncome, deductions, taxPayable
+├── FIREGoal[] — targetCorpus, monthlyExpenses, targetYears, monthlySIP
+├── HealthScore[] — overallScore, emergencyFund, savingsRate, debtToIncome
+└── ChatMessage[] — agentType, query, response, createdAt
 ```
+
+---
+
+## DhanSarthi Routing Logic
+
+DhanSarthi uses a **keyword-based scoring system with priority boosts**:
+
+1. **Greeting Detection** (runs first): `hello`, `hi`, `namaste`, `good morning`, `help`, `thanks` → self-handles with friendly response
+2. **Finance Keyword Guard**: If greeting + finance keywords present → route to agent instead
+3. **Agent Scoring**: Each agent has keywords + example queries. Score = keyword matches × weight
+4. **Priority Boost**: Life Event (+3.0) and Couple Planner (+3.0) get boosted to prevent misrouting to Yojana
+5. **Confidence Threshold**: 0.3 minimum to route; below that → default to Niveshak
+
+### Agent Types (10 total)
+
+| AgentType | Handles |
+|-----------|---------|
+| `DHAN_SARTHI` | Greetings, help, thanks, generic explain |
+| `NIVESHAK` | Portfolio analysis, mutual funds, XIRR |
+| `KARVID` | Tax calculation, 80C/80D, capital gains |
+| `YOJANA` | FIRE planning, retirement, SIP |
+| `BAZAAR` | Stock prices, market data |
+| `DHAN` | Financial health score |
+| `VIDHI` | Legal compliance, SEBI |
+| `LIFE_EVENT` | Marriage, baby, education planning |
+| `COUPLE_PLANNER` | Joint budgets, expense splitting |
 
 ---
 
 ## Project Structure
 
 ```
-~/ai-money-mentor/
-|-- app.py                      # Streamlit main app
-|-- api_server.py               # FastAPI server (chat bridge + endpoints)
-|-- chat_bridge.py              # Chat bridge module
-|-- chat_history.db             # SQLite chat history
-|-- requirements.txt            # Python dependencies
-|-- ARCHITECTURE.md             # This file
-|-- IMPLEMENTATION.md           # Implementation status
-|-- README.md                   # Project overview
-|
-|-- ui/                         # Streamlit UI pages
-|   |-- fire_ui.py              # FIRE Planner (chat + calculator)
-|   |-- tax_ui.py               # Tax Wizard (chat + calculator)
-|   |-- health_ui.py            # Financial Health (chat + calculator)
-|   |-- market_ui.py            # Market Research (chat + stock lookup)
-|   |-- niveshak_ui.py           # MF Portfolio (chat + demo data)
-|   |-- vidhi_ui.py              # Compliance (chat + disclaimers)
-|
-|-- agents/                     # Python calculation agents
-|   |-- karvid/                 # Tax Calculator
-|   |   |-- __init__.py
-|   |   |-- tax_calculator.py   # Main calculation logic
-|   |   |-- indian_tax_laws.py   # Tax slabs and rules
-|   |
-|   |-- yojana/                 # FIRE Planner
-|   |   |-- __init__.py
-|   |   |-- fire_calculator.py  # FIRE number calculation
-|   |
-|   |-- bazaar/                 # Market Research
-|   |   |-- __init__.py
-|   |   |-- stock_data.py       # Stock quotes (NSE/BSE)
-|   |
-|   |-- dhan/                   # Financial Health
-|   |   |-- __init__.py
-|   |   |-- health_score.py     # Health score calculator
-|   |
-|   |-- niveshak/               # Portfolio Analyzer
-|   |   |-- __init__.py
-|   |   |-- cas_parser.py       # CAS statement parsing
-|   |   |-- portfolio_analyzer.py
-|   |
-|   |-- dhan_sarthi/            # Coordinator
-|   |   |-- __init__.py
-|   |   |-- coordinator.py      # Routing logic
-|   |   |-- ai_responder.py     # AI response handling
-|   |
-|   |-- vidhi/                  # Compliance
-|       |-- __init__.py
-|       |-- compliance.py
-|
-|-- bots/                       # Telegram bot handlers
-    |-- telegram_bot.py
+AI-Money-Mentor/
+├── frontend/                    # Next.js 16 + React 19
+│   ├── src/app/
+│   │   ├── agents/              # 9 agent UI pages
+│   │   ├── api/                 # BFF proxy routes + auth + save
+│   │   │   ├── auth/            # login, signup, update
+│   │   │   ├── save/            # chat, fire, health, tax
+│   │   │   └── [agent]/         # 8 agent proxy routes
+│   │   ├── login/page.tsx       # Auth page
+│   │   └── profile/page.tsx     # User profile
+│   ├── src/lib/
+│   │   ├── api.ts               # Axios clients (9 agent APIs)
+│   │   ├── prisma.ts            # Prisma singleton
+│   │   └── store.ts             # Zustand (user, theme)
+│   └── prisma/schema.prisma     # DB models
+│
+├── backend/
+│   ├── api_server.py            # FastAPI (20+ endpoints)
+│   ├── chat_bridge.py           # OpenClaw CLI ↔ SQLite bridge
+│   ├── agents/
+│   │   ├── dhan_sarthi/coordinator.py  # Query routing (10 agents)
+│   │   ├── karvid/              # Indian tax engine
+│   │   ├── yojana/              # FIRE calculator
+│   │   ├── bazaar/              # NSE stock data
+│   │   ├── dhan/                # Health score (8-factor)
+│   │   ├── niveshak/            # Portfolio analyzer
+│   │   ├── vidhi/               # SEBI compliance
+│   │   ├── life_event/          # Life event planner
+│   │   └── couple_planner/      # Couple finance planner
+│   └── tests/
+│       ├── deep_agent_test.py   # 26 deep integration tests
+│       └── greeting_test.py     # 25 greeting/routing tests
+│
+├── README.md
+├── ARCHITECTURE.md              # This file
+├── IMPLEMENTATION.md
+└── CLAUDE.md
 ```
 
 ---
 
-## Technology Stack
+## Tech Stack
 
 | Layer | Technology | Purpose |
 |-------|------------|---------|
-| Frontend | Streamlit | Web UI with chat widgets |
-| Backend API | FastAPI | REST endpoints + Chat bridge |
-| AI Agents | OpenClaw + GLM-5 | Natural language understanding |
-| Calculations | Python | Tax, FIRE, Stock, Health |
-| Database | SQLite | Chat history persistence |
-| Messaging | Telegram Bot API | Alternative interface |
-| Model | GLM-5 Cloud (via Ollama) | 203k context, Indian finance |
+| Frontend | Next.js 16, React 19, TypeScript | App Router, SSR |
+| Styling | Tailwind CSS v4, shadcn/ui | Responsive UI |
+| Backend | FastAPI, Python 3.11+ | REST API (20+ endpoints) |
+| Database | Prisma 5, SQLite | Users, chat, portfolios |
+| State | Zustand + localStorage | Client-side auth/theme |
+| AI Swarm | OpenClaw 2026.3, Ollama, GLM-5 | Multi-agent orchestration |
+| Testing | Deep + Greeting tests (51 total) | Live EC2 integration tests |
 
 ---
 
-## API Endpoints
+## Deployment (EC2)
 
-### Chat Bridge
+| Service | Port | Command |
+|---------|------|---------|
+| Frontend | 3000 | `cd frontend && npm run dev` |
+| Backend | 8000 | `cd backend && uvicorn api_server:app --host 0.0.0.0 --port 8000` |
 
-```
-POST /bridge/chat
-{
-  "message": "Calculate tax for 20 lakhs",
-  "user_id": "user123",
-  "session_id": "session456",
-  "agent_id": "dhan-sarthi"
-}
-
-Response:
-{
-  "agent": "dhan-sarthi",
-  "response": "## Tax: Rs.20 Lakhs...",
-  "session_id": "session456",
-  "history_count": 5
-}
-```
-
-### Direct Calculator Endpoints
-
-```
-POST /karvid/calculate-tax
-{
-  "income": 2000000,
-  "regime": "both",
-  "age": 30
-}
-
-POST /yojana/fire
-{
-  "monthly_expenses": 50000,
-  "current_age": 30,
-  "retirement_age": 50
-}
-
-POST /bazaar/stock-quote
-{
-  "symbol": "RELIANCE"
-}
-
-POST /dhan/health-score
-{
-  "monthly_income": 100000,
-  "monthly_expenses": 60000,
-  "monthly_investments": 20000,
-  "emergency_fund": 200000,
-  "total_debt": 500000
-}
-```
+**EC2:** `ubuntu@3.109.186.88`
+**GitHub:** https://github.com/Devguru-codes/AI-Money-Mentor
 
 ---
 
-## Agent Responsibilities
+## Testing
 
-| Agent | Role | Skills | Routes To |
-|-------|------|--------|-----------|
-| **dhan-sarthi** | Coordinator | Query routing, multi-agent | karvid, yojana, bazaar, dhan, niveshak, vidhi |
-| **karvid** | Tax Wizard | Income tax, deductions, capital gains | tax_calculator.py |
-| **yojana** | FIRE Planner | Retirement, SIP, corpus | fire_calculator.py |
-| **bazaar** | Market Research | Stocks, NSE/BSE | stock_data.py |
-| **dhan** | Financial Health | Health score, savings | health_score.py |
-| **niveshak** | Portfolio | MF analysis, XIRR | portfolio_analyzer.py |
-| **vidhi** | Compliance | SEBI rules, disclaimers | compliance.py |
+- **Deep Agent Tests (26):** Every backend endpoint with parameter validation
+- **Greeting Tests (25):** DhanSarthi routing — greetings, help, thanks, explain, finance keywords, regressions
+- **Total: 51/51 PASS** ✅
 
 ---
 
-## Deployment
-
-### Development
-
-```bash
-# Start API server
-cd ~/ai-money-mentor
-source venv/bin/activate
-python3 -m uvicorn api_server:app --host 0.0.0.0 --port 8000
-
-# Start Streamlit
-streamlit run app.py --server.address 0.0.0.0 --server.port 8501
-
-# OpenClaw Gateway (runs as daemon)
-openclaw gateway start
-```
-
-### Production (EC2)
-
-- API Server: Port 8000
-- Streamlit: Port 8501
-- OpenClaw Gateway: Port 18789
-
----
-
-## URLs
-
-| Service | URL |
-|---------|-----|
-| Streamlit UI | http://3.109.186.88:8501/ |
-| API Health | http://3.109.186.88:8000/health |
-| GitHub | https://github.com/Devguru-codes/AI-Money-Mentor |
-
----
-
-*Last Updated: March 25, 2026*
+*Last Updated: March 26, 2026*

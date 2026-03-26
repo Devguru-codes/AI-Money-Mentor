@@ -412,12 +412,19 @@ export default function DhanSarthiPage() {
           setLastAskedFor(null)
         }
       } else {
-        // Step 1: Route the query
+        // Step 1: Route the query with recent chat context
         try {
+          // Build context from recent messages (last 5 exchanges)
+          const recentMessages = messages.slice(-10).map(m => ({
+            role: m.role,
+            content: m.content,
+            agent: m.agent || undefined,
+          }))
+
           const routeResponse = await fetch("/api/dhan-sarthi", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query }),
+            body: JSON.stringify({ query, context: recentMessages }),
           })
           if (routeResponse.ok) {
             const routeData = await routeResponse.json()

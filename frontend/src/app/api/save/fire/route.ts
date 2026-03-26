@@ -26,3 +26,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to save: ' + error.message }, { status: 500 })
   }
 }
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get('userId')
+    if (!userId) return NextResponse.json({ error: 'userId is required' }, { status: 400 })
+    const fireGoals = await prisma.fIREGoal.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+    })
+    return NextResponse.json({ fireGoals })
+  } catch (error: any) {
+    return NextResponse.json({ error: 'Failed to load: ' + error.message }, { status: 500 })
+  }
+}

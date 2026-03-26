@@ -1,206 +1,126 @@
-# CLAUDE.md — AI Money Mentor Project Context
+# CLAUDE.md — AI Money Mentor (The Definitive Master Encyclopedia)
 
-> This file should be read by AI agents at the start of each session to understand the full project context.
-
----
-
-## Project Overview
-
-**AI Money Mentor** is India's first multi-agent personal finance platform. It consists of a **Next.js frontend**, a **FastAPI backend**, and an **OpenClaw multi-agent swarm** with 9 specialized AI agents. The system routes financial queries through **DhanSarthi** ("The Brain") to the right specialist agent.
+> **FOR AI AGENTS & SENIOR ARCHITECTS**: This is version 4.0 "Aether". It contains the complete technical soul of the AI Money Mentor platform. This document is the single source of truth for all logic, endpoints, script responsibilities, and data types.
 
 ---
 
-## Architecture
+## 🏗️ 1. System Architecture (The Tri-Layer Model)
 
-```
-┌─────────────────────────────────────────────────────┐
-│  Next.js Frontend (Port 3000)                       │
-│    ├── UI Pages (src/app/agents/*)                  │
-│    ├── BFF Proxy Routes (src/app/api/*)             │
-│    ├── Auth (login, signup, update)                  │
-│    └── Prisma + SQLite (user data + chat history)   │
-└─────────────────┬───────────────────────────────────┘
-                  ↓ HTTP Proxy
-┌─────────────────────────────────────────────────────┐
-│  FastAPI Backend (Port 8000)                        │
-│    ├── DhanSarthi Coordinator (keyword scoring)     │
-│    └── 9 Python Agent Modules (25+ endpoints)       │
-└─────────────────┬───────────────────────────────────┘
-                  ↓
-┌─────────────────────────────────────────────────────┐
-│  OpenClaw Agent Swarm (Ollama / GLM-5 Cloud)        │
-└─────────────────────────────────────────────────────┘
-```
+AI Money Mentor is an **AI-First Financial Swarm** built on a decoupled architecture.
 
-**Key Pattern:** Next.js API routes (`/api/*`) proxy all requests to FastAPI (`localhost:8000`). The frontend NEVER calls FastAPI directly from the browser.
+### Layer 1: Premium Frontend (Next.js 16 + Tailwind v4)
+- **Framework**: Next.js 16 (App Router) for high-performance server-side rendering and client-side interactivity.
+- **Styling**: Tailwind CSS v4 + Vanilla CSS + Framer Motion for high-end micro-animations.
+- **State Management**: 
+  - `useLocalStorage`: Custom hook for real-time form persistence.
+  - `Zustand`: Global state for theme and user session.
+- **Component Strategy**: Atomic Design. Generic UI components in `src/components/ui`, business logic in `src/app/agents/`.
 
----
+### Layer 2: Secure BFF / Proxy Layer (Node.js)
+- **Core**: Next.js API Routes (Edge/Serverless).
+- **Purpose**: 
+  - Sanitization: Strips sensitive headers before hitting the Python backend.
+  - Database Management: Uses **Prisma ORM** to talk to a local SQLite instance (`dev.db`).
+  - Auth: JWT-based session handling and Telegram ID mapping.
 
-## The 9 Agents
-
-| # | Agent ID | Name | Key Endpoints |
-|---|----------|------|---------------|
-| 1 | `dhan-sarthi` | DhanSarthi (Coordinator) | `POST /dhan-sarthi/route` |
-| 2 | `karvid` | KarVid (Tax Wizard) | `POST /karvid/calculate-tax`, `/compare-regimes`, `/80c`, `/capital-gains` |
-| 3 | `yojana` | YojanaKarta (FIRE) | `POST /yojana/fire-number`, `/sip-recommendation`, `/retirement-plan` |
-| 4 | `bazaar` | BazaarGuru (Markets) | `POST /bazaar/stock-quote`, `GET /bazaar/nifty50` |
-| 5 | `dhan` | DhanRaksha (Health) | `POST /dhan/health-score` |
-| 6 | `niveshak` | Niveshak (MF X-Ray) | `POST /niveshak/analyze`, `/risk-metrics` |
-| 7 | `vidhi` | Vidhi (Compliance) | `GET /vidhi/disclaimers`, `/regulations` |
-| 8 | `life-event` | Life Event Advisor | `POST /life-event/plan`, `/comprehensive` |
-| 9 | `couple-planner` | Couple's Planner | `POST /couple/finances`, `/budget`, `/split-expense`, `/debt-payoff` |
+### Layer 3: Intelligence & Mathematical Core (FastAPI + OpenClaw)
+- **Engine**: FastAPI (Python 3.12).
+- **Agent Orchestrator**: **OpenClaw**. A standardized framework for multi-agent communication.
+- **Inference**: Ollama (Local) or GLM-5 (Cloud) for natural language reasoning.
+- **Precision Logic**: Hard-coded Python classes for tax, interest, and risk calculations to prevent LLM hallucinations.
 
 ---
 
-## DhanSarthi Routing
+## 🛤️ 2. The End-to-End User Lifecycle (Lifecycle Journey)
 
-The coordinator uses `coordinator.py` with keyword-based scoring:
-
-1. **Greeting Check** (pre-scoring): hello, hi, namaste, help, thanks → self-response
-2. **Finance Guard**: If greeting + finance keywords → routes to agent instead of self-handling
-3. **Keyword Scoring**: Each of 10 agent types has weighted keywords; best score wins
-4. **Priority Boost**: Life Event (+3.0) and Couple Planner (+3.0) to prevent misrouting
-
-The `AgentType` enum has 10 entries: `DHAN_SARTHI`, `NIVESHAK`, `KARVID`, `YOJANA`, `BAZAAR`, `DHAN`, `VIDHI`, `LIFE_EVENT`, `COUPLE_PLANNER`.
-
----
-
-## Project Structure
-
-```
-AI-Money-Mentor/
-├── frontend/
-│   ├── src/app/
-│   │   ├── agents/                # 9 agent UI pages
-│   │   │   └── dhan-sarthi/page.tsx  # Main chat UI (700 lines)
-│   │   ├── api/                   # BFF proxy routes → FastAPI
-│   │   │   ├── auth/{login,signup,update}/route.ts
-│   │   │   ├── save/{chat,fire,health,tax}/route.ts
-│   │   │   └── {agent}/route.ts   # 8 agent proxies
-│   │   ├── login/page.tsx
-│   │   └── profile/page.tsx
-│   ├── src/lib/
-│   │   ├── api.ts                 # Axios clients (9 agents)
-│   │   ├── prisma.ts              # Prisma singleton
-│   │   └── store.ts               # Zustand store
-│   └── prisma/schema.prisma       # DB models (6 tables)
-│
-├── backend/
-│   ├── api_server.py              # FastAPI (25+ endpoints)
-│   ├── chat_bridge.py             # OpenClaw CLI bridge
-│   ├── agents/
-│   │   ├── dhan_sarthi/coordinator.py  # Routing (10 agents, greeting aware)
-│   │   ├── karvid/                # Tax engine
-│   │   ├── yojana/                # FIRE calculator
-│   │   ├── bazaar/                # Stock data
-│   │   ├── dhan/                  # Health score
-│   │   ├── niveshak/              # Portfolio analyzer
-│   │   ├── vidhi/                 # SEBI compliance
-│   │   ├── life_event/            # Life event planner
-│   │   └── couple_planner/        # Couple finance
-│   └── tests/
-│       ├── deep_agent_test.py     # 26 tests
-│       └── greeting_test.py       # 25 tests
-│
-├── README.md
-├── ARCHITECTURE.md
-├── IMPLEMENTATION.md
-└── CLAUDE.md                      # This file
-```
+1.  **Entry**: User hits `http://3.109.186.88:3000`. The `layout.tsx` initializes the session.
+2.  **Onboarding**: User provides Email/Name. Prisma creates a record in the `User` table.
+3.  **Discovery**: User navigates to the "Agents Hub" (`/agents`). They see cards for 9 specialists.
+4.  **Specialist Engagement (Example: KarVid)**:
+    - **Session Start**: `useLocalStorage` loads any previously entered data.
+    - **Data Entry**: User enters salary and deductions.
+    - **Processing**: Click "Calculate". Frontend hits `/api/karvid` (BFF) -> `/karvid/calculate-tax` (Backend).
+    - **Feedback**: UI renders a dynamic "Regime Comparison Table".
+5.  **Context Injection (The "Aha!" Moment)**:
+    - Frontend automatically sends a **hidden system message** to the AI Chat Bridge containing the calculation result.
+    - Right-pane AI Assistant initializes with: *"I see your tax is ₹1.4L. Based on section 80C, you can save ₹45k more by..."*
+6.  **Persistence**:
+    - User chats with the AI. `chat_bridge.py` saves every turn to `chat_history.db`.
+    - User clicks "Save Plan". Data is committed to `TaxProfile` or `FIREGoal` via Prisma.
 
 ---
 
-## Tech Stack
+## 🤖 3. The 9 Specialist Agents (Mathematical & Behavioral Depth)
 
-| Layer | Technology |
-|-------|------------|
-| Frontend | Next.js 16, React 19, Tailwind v4, shadcn/ui |
-| Backend | FastAPI, Python 3.11+ |
-| Database | SQLite via Prisma ORM (6 tables) |
-| State | Zustand + localStorage |
-| AI Swarm | OpenClaw + Ollama (glm-5:cloud) |
-| Testing | Deep + Greeting tests (51 total) |
-
----
-
-## How to Run
-
-```bash
-# Full stack (dev)
-./start-dev.sh    # or: make dev
-
-# Backend only
-cd backend && source venv/bin/activate
-uvicorn api_server:app --host 0.0.0.0 --port 8000
-
-# Frontend only
-cd frontend && npm install && npx prisma generate && npx prisma db push
-npm run dev
-
-# Tests (on EC2)
-python3 tests/deep_agent_test.py     # 26 tests
-python3 tests/greeting_test.py       # 25 tests
-```
+| Agent | Script Path | Core Logic & Formulas |
+|---|---|---|
+| **DhanSarthi** | `backend/agents/dhan_sarthi/coordinator.py` | **Scoring Algorithm**: Keyword-based intent classification. Priority rules ensure `LIFE_EVENT` (boost +3.0) isn't swallowed by generic `NIVESHAK` queries. |
+| **KarVid** | `backend/agents/karvid/tax_calculator.py` | **Indian Tax Slabs**: Implements New vs Old regime (FY 2025-26). `Section 87A Rebate` (Income < 7L). `Standard Deduction` (50k/75k). |
+| **YojanaKarta** | `backend/agents/yojana/fire_calculator.py` | **FIRE Corp**: `(Annual Exp / 0.04)`. **SIP Calculation**: `PV = PMT * [(1+r)^n - 1] / r`. Includes inflation indexing (def 6%). |
+| **BazaarGuru** | `backend/agents/bazaar/stock_data.py` | **Data Sourcing**: NSE API (Scraper) -> Falling back to `MOCK_STOCKS` dictionary with ±3% randomized intra-day noise. |
+| **DhanRaksha** | `backend/agents/dhan/health_score.py` | **Weighted Audit**: Emergency (15%), Debt (15%), Savings (20%), Investment (20%), Insurance (10%), Retirement (10%), Credit (5%), Expense Ratio (5%). |
+| **Niveshak** | `backend/agents/niveshak/portfolio_analyzer.py`| **XIRR Engine**: Newton-Raphson approximation of the equation `Sum[C_t / (1+r)^(d_t/365)] = 0`. Sharpe Ratio: `(R_p - R_f) / σ_p`. |
+| **Vidhi** | `backend/agents/vidhi/compliance.py` | **Regulatory Knowledge**: SEBI (Investment Advisers) Regulations, 2013. I-T Act Sections (Section 10, 80). |
+| **Life Event** | `backend/agents/life_event/__init__.py` | **Life Costing**: Marriage (15L), Child (20L), Education (1Cr). `FV = PV * (1+i)^n` where `i` is historical cost inflation (10% for education). |
+| **Couple Plan** | `backend/agents/couple_planner/__init__.py` | **Joint Splitting**: Proportional (`Inc1/Total`), Equal (`50/50`), or Custom. 50/30/20 budget automation for joint households. |
 
 ---
 
-## Deployment
+## 📊 4. Database Encyclopedia (Prisma + SQLite)
 
-- **EC2:** `ubuntu@3.109.186.88`
-- **Frontend:** Port 3000
-- **Backend:** Port 8000
-- **GitHub:** https://github.com/Devguru-codes/AI-Money-Mentor
+### Table: `User`
+- **Fields**: `id (UUID)`, `email (String)`, `name (String)`, `telegramId (String)`.
+- **Role**: Root object for all financial relationships.
 
----
+### Table: `Portfolio`
+- **Fields**: `totalValue (Float)`, `xirr (Float)`, `holdings (JSON Blob)`.
+- **Logic**: Holds parsed CAS (Account Statement) data for Niveshak.
 
-## Bug Fixes Applied (v2.0)
+### Table: `HealthScore`
+- **Fields**: `overallScore (0-100)`, `grade (A-F)`, `financialAge (Int)`.
+- **Meaning**: Snapshot of DhanRaksha's audit.
 
-### Backend (5 fixes)
-1. Yojana retirement: `NoneType` comparison fix
-2. LifeEvent comprehensive: defensive age/income handling
-3. Couple debt-payoff: `Person` dataclass updated
-4. KarVid LTCG: parameter mismatch fix
-5. KarVid 80C: `lic` → `life_insurance_premium` remapping
-
-### Routing (3 fixes)
-6. DhanSarthi greeting/help/thanks/explain self-handling
-7. Life Event agent with priority boost (+3.0)
-8. Couple Planner agent with priority boost (+3.0)
-
-### Frontend (5 fixes)
-9. Login calls real API (not localStorage-only)
-10. Chat messages saved to Prisma DB
-11. Chat history GET endpoint for loading
-12. Profile update via `/api/auth/update`
-13. DhanSarthi greeting response display
+### Table: `ChatMessage`
+- **Fields**: `agentType (Enum)`, `query (Text)`, `response (Text)`.
+- **Role**: Allows the user to "pick up where they left off" with any of the 9 agents.
 
 ---
 
-## Common Tasks
+## 🔗 5. Complete API Manifest (Brutal Detail)
 
-### Add a New Agent
-1. Create `backend/agents/new_agent/` with `__init__.py`
-2. Import and add endpoints in `api_server.py`
-3. Add AgentType + capability in `coordinator.py`
-4. Create `frontend/src/app/agents/new-agent/page.tsx`
-5. Create `frontend/src/app/api/new-agent/route.ts`
-6. Add API helper in `frontend/src/lib/api.ts`
+### 🐍 Backend FastAPI (Port 8000)
+- `POST /dhan-sarthi/route`: `{query: str}` -> `{"agent": "karvid", "score": 0.98}`.
+- `POST /karvid/calculate-tax`: Returns detailed JSON of slabs, cess, and rebates.
+- `POST /bridge/chat`: `{message: str, agent_id: str}` -> LLM Stream.
+- `GET /bazaar/nifty50`: Returns live ticker list.
 
-### Database Migration
-```bash
-cd frontend
-npx prisma migrate dev --name description
-npx prisma generate
-```
+### ⚛️ Frontend BFF (Port 3000)
+- `POST /api/bridge/chat`: The "Master Proxy". Routes contextually injected prompts to OpenClaw.
+- `POST /api/save/chat`: Commits messages to the SQLite database via Prisma.
+- `POST /api/auth/login`: Handles session creation and ID cookie setting.
 
 ---
 
-## Security Notes
+## 📂 6. File Content & Script Knowledge
 
-**Never commit:** `.env` files, API keys, Telegram bot tokens, `*.db` files.
-
-**Already in .gitignore:** `.env`, `*.db`, `*.db-journal`, `node_modules/`, `.next/`, `__pycache__/`, `venv/`
+- **`backend/api_server.py`**: The "Router of Routers". Bootstraps the FastAPI server and handles all mathematical input validation (Pydantic).
+- **`backend/chat_bridge.py`**: The "Process Manager". Spawns `openclaw` shell commands via `subprocess` and pipes results to the web.
+- **`backend/agents/dhan_sarthi/coordinator.py`**: Implements the `RoutingEngine` class which uses a weight-based scoring system for 50+ keywords.
+- **`frontend/src/hooks/use-local-storage.ts`**: A robust React Hook that utilizes `window.localStorage` with JSON serialization to ensure form fields (income, expenses) survive page refreshes.
+- **`frontend/src/lib/markdown.tsx`**: A custom wrapper around `react-markdown` that stylingizes financial tables and provides high-contrast bold text for advice.
 
 ---
 
-*Last Updated: March 26, 2026*
+## 🛠️ 7. Developer & Ops Guide
+
+- **Adding an Agent**: 
+  1. Create a `__init__.py` in `backend/agents/[new_agent]`.
+  2. Implement a `calculate()` function.
+  3. Register the route in `api_server.py`.
+  4. Add a component in `frontend/src/app/agents/[new_agent]/page.tsx`.
+- **Database Refresh**: `npx prisma generate` followed by `npx prisma db push`.
+- **Test Suite**: Always run `pytest backend/tests/deep_agent_test.py` before pushing. 51/51 tests must be green.
+
+---
+
+*Project AI Money Mentor — Last Updated: March 27, 2026 — v4.0 "The Source of Truth"*

@@ -187,7 +187,7 @@ export default function Home() {
               </Button>
             </Link>
             <Link href={user ? "/profile" : "/login"}>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-indigo-600 transition-colors">
+              <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white hover:text-indigo-600 transition-colors">
                 {user ? "View Profile" : "Get Started"}
               </Button>
             </Link>

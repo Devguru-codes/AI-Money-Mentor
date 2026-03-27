@@ -259,7 +259,7 @@ export default function KarVidPage() {
 
                       {/* Visual Bar Chart Implementation */}
                       <div className="flex items-end justify-center gap-12 h-56 pt-4 border-b">
-                        <div className="flex flex-col items-center flex-1 max-w-[120px]">
+                        <div className="flex flex-col items-center justify-end h-full flex-1 max-w-[120px]">
                           <div className="w-full rounded-t-lg bg-slate-300 relative group transition-all" 
                                style={{ height: `${Math.max(5, (result.oldRegime / Math.max(1, result.oldRegime, result.newRegime)) * 100)}%` }}>
                             <div className="absolute -top-8 w-full text-center font-bold text-sm">{formatCurrency(result.oldRegime)}</div>
@@ -267,7 +267,7 @@ export default function KarVidPage() {
                           <span className="mt-4 font-semibold text-muted-foreground">Old Regime</span>
                         </div>
 
-                        <div className="flex flex-col items-center flex-1 max-w-[120px]">
+                        <div className="flex flex-col items-center justify-end h-full flex-1 max-w-[120px]">
                           <div className="w-full rounded-t-lg bg-green-400 relative group transition-all" 
                                style={{ height: `${Math.max(5, (result.newRegime / Math.max(1, result.oldRegime, result.newRegime)) * 100)}%` }}>
                             <div className="absolute -top-8 w-full text-center font-bold text-sm">{formatCurrency(result.newRegime)}</div>

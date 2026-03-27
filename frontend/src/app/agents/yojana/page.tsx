@@ -131,7 +131,7 @@ export default function YojanaPage() {
       window.dispatchEvent(new Event("storage"))
 
       // AI Context Update
-      handleSendMessage(`I just ran a calculation. I plan to retire in ${fireResult.yearsToRetire} years. My target inflation-adjusted corpus is ₹${formatRupees(fireResult.inflationAdjusted)} requiring a monthly SIP of ₹${formatCurrency(fireResult.monthlySIP)}. How feasible is this considering 12% equity returns? Can you suggest an asset allocation?`)
+      handleSendMessage(`I just ran a calculation. I plan to retire in ${fireResult.yearsToRetire} years. My target inflation-adjusted corpus is ₹${formatRupees(fireResult.inflationAdjusted)} requiring a monthly SIP of ${formatCurrency(fireResult.monthlySIP)}. How feasible is this considering 12% equity returns? Can you suggest an asset allocation?`)
 
     } catch (error) {
       toast.error("Backend is offline. Please ensure the FastAPI server is running.")

@@ -180,8 +180,14 @@ export default function NiveshakPage() {
           <Card>
             <CardHeader>
               <CardTitle>Manage Your Holdings</CardTitle>
-              <CardDescription>
-                Add the mutual funds in your portfolio to calculate total value, XIRR, and Sharpe Ratio.
+              <CardDescription className="text-sm">
+                Add the mutual funds in your portfolio to calculate dynamic XIRR performance.
+                <div className="mt-3 space-y-1 text-xs opacity-90">
+                  <p><b>Units:</b> Total fund quantities currently owned.</p>
+                  <p><b>NAV (₹):</b> Current price per individual unit.</p>
+                  <p><b>SIP (₹):</b> Your average continuous monthly deposit.</p>
+                  <p><b>Months:</b> How long you've systematically invested.</p>
+                </div>
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

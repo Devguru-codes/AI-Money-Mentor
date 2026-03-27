@@ -135,8 +135,13 @@ npm run dev
 
 ### 4. Open in Browser
 
-- **Frontend:** `http://<your-ip>:3000` (Use `http://localhost:3000` if running locally)
-- **API Docs:** `http://<your-ip>:8000/docs` (Use `http://localhost:8000/docs` if running locally)
+**Online Deployment:**
+- **Frontend App:** [http://3.109.186.88:3000](http://3.109.186.88:3000)
+- **API Docs:** [http://3.109.186.88:8000/docs](http://3.109.186.88:8000/docs)
+
+**Local Deployment:**
+- **Frontend App:** [http://localhost:3000](http://localhost:3000)
+- **API Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 

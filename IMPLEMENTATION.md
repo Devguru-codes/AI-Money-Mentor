@@ -43,7 +43,7 @@ Next.js 16 (Port 3000) → BFF Proxy (/api/*) → FastAPI (Port 8000) → OpenCl
 | DhanSarthi Chat | `app/agents/dhan-sarthi/page.tsx` | Full chat UI with routing, greeting, informational responses, chat persistence |
 | Login | `app/login/page.tsx` | Email/Telegram auth, calls real API |
 | Profile | `app/profile/page.tsx` | Update name/phone via `/api/auth/update` |
-| 8 Agent Pages | `app/agents/[agent]/page.tsx` | Individual agent UIs |
+| 8 Agent UIs | `app/agents/[agent]/page.tsx` | Split-Pane layout: Form + sticky OpenClaw integration |
 
 ### API Routes (BFF)
 | Route | Method | Purpose |
@@ -126,12 +126,11 @@ Next.js 16 (Port 3000) → BFF Proxy (/api/*) → FastAPI (Port 8000) → OpenCl
 7. **Life Event routing:** Added `LIFE_EVENT` agent with priority boost (+3.0)
 8. **Couple routing:** Added `COUPLE_PLANNER` agent with priority boost (+3.0)
 
-### Frontend Fixes (5)
-9. **Login page:** Now calls real API (`/api/auth/login`, `/api/auth/signup`)
-10. **Chat persistence:** Messages saved to Prisma DB via `/api/save/chat`
-11. **Chat history loading:** Added GET endpoint to load previous messages
-12. **Profile update:** New `/api/auth/update` endpoint with `prisma.user.update()`
-13. **Greeting display:** DhanSarthi chat page handles `dhan-sarthi` routing responses
+### Frontend Architecture (Phase 7 Unification - v2.1)
+9. **State Persistence:** Form calculations rehydrate via `useLocalStorage` to prevent data loss on reload.
+10. **Split-Pane UI:** Universal `lg:grid-cols-2` design with sticky OpenClaw AI chat sidebars on all 9 agents.
+11. **Context-Aware Proxy:** Calculations silently pass resulting JSON via `/api/bridge/chat` for immediate AI context evaluation.
+12. **Universal Markdown Parsing:** Flawless `react-markdown` response formatting.
 
 ---
 
@@ -169,4 +168,4 @@ Next.js 16 (Port 3000) → BFF Proxy (/api/*) → FastAPI (Port 8000) → OpenCl
 
 ---
 
-*Last Updated: March 26, 2026*
+*Last Updated: March 27, 2026*

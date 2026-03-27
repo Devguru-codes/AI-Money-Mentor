@@ -15,9 +15,9 @@ AI Money Mentor is India's first multi-agent personal finance platform for India
 │                      (Port 3000)                                │
 │                                                                 │
 │  ┌──────────────────────┐  ┌──────────────────────────────────┐│
-│  │  Prisma + SQLite     │  │  Zustand Store (localStorage)   ││
-│  │  User, Chat, Tax,    │  │  user, theme, activeAgent       ││
-│  │  FIRE, Health        │  │                                  ││
+│  │  Prisma + SQLite     │  │  Zustand Store + useLocalStorage││
+│  │  User, Chat, Tax,    │  │  user, activeAgent, persistent  ││
+│  │  FIRE, Health        │  │  form inputs across reloading   ││
 │  └──────────────────────┘  └──────────────────────────────────┘│
 └───────────────────────┬─────────────────────────────────────────┘
                         │  BFF Proxy (/api/*)
@@ -225,4 +225,4 @@ AI-Money-Mentor/
 
 ---
 
-*Last Updated: March 26, 2026*
+*Last Updated: March 27, 2026*

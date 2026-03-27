@@ -147,7 +147,7 @@ export default function YojanaPage() {
     const requiredFromSIP = Math.max(0, fireNumber - futureValueOfCurrent)
     const months = (data.retirementAge - data.currentAge) * 12
     const rate = data.expectedReturn / 100 / 12
-    if (requiredFromSIP <= 0) return 0
+    if (requiredFromSIP <= 0 || months <= 0 || rate <= 0) return 0
     return (requiredFromSIP * rate) / (Math.pow(1 + rate, months) - 1)
   }
 
@@ -281,8 +281,8 @@ export default function YojanaPage() {
             <CardContent className="flex-1 flex flex-col p-0">
               <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[500px]">
                 {messages.map((msg) => (
-                  <div key={msg.id} className={`flex \${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[85%] rounded-xl p-3 \${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                  <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[85%] rounded-xl p-3 ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                       <div className="whitespace-pre-wrap text-sm leading-relaxed">{parseMarkdown(msg.content)}</div>
                     </div>
                   </div>

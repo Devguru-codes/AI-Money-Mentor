@@ -102,10 +102,10 @@ export default function BazaarPage() {
       }
       const data = await response.json()
       setResult(data)
-      toast.success(`Successfully fetched \${searchTarget}`)
+      toast.success(`Successfully fetched ${searchTarget}`)
 
       // Send context to AI
-      handleSendMessage(`I just pulled up real-time quotes for \${data.name} (\${data.symbol}). It is currently trading at ₹\${data.price} with a P/E Ratio of \${data.pe}. Can you give me a structural analysis of this company? Should I buy, hold, or sell at this valuation?`)
+      handleSendMessage(`I just pulled up real-time quotes for ${data.name} (${data.symbol}). It is currently trading at ₹${data.price} with a P/E Ratio of ${data.pe}. Can you give me a structural analysis of this company? Should I buy, hold, or sell at this valuation?`)
 
     } catch (error) {
       setResult(null)
@@ -201,8 +201,8 @@ export default function BazaarPage() {
                     </div>
                     <div className="text-right">
                       <p className="text-3xl font-bold font-mono tracking-tight">{formatCurrency(result.price)}</p>
-                      <Badge className={`mt-1 \${result.change >= 0 ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"}`}>
-                        {result.change >= 0 ? "▲" : "▼"} {Math.abs(result.change).toFixed(2)} ({result.changePercent.toFixed(2)}%)
+                      <Badge className={`mt-1 ${result.change >= 0 ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"}`}>
+                        {result.change >= 0 ? "▲" : "▼"} {Math.abs(result.change || 0).toFixed(2)} ({(result.changePercent || 0).toFixed(2)}%)
                       </Badge>
                     </div>
                   </div>
@@ -223,7 +223,7 @@ export default function BazaarPage() {
                     </div>
                     <div className="p-4 bg-muted/40 rounded-xl border">
                       <p className="text-xs text-muted-foreground font-medium mb-1">P/E Ratio</p>
-                      <p className="text-lg font-semibold font-mono">{result.pe.toFixed(2)}</p>
+                      <p className="text-lg font-semibold font-mono">{(result.pe || 0).toFixed(2)}</p>
                     </div>
                   </div>
                   
@@ -247,8 +247,8 @@ export default function BazaarPage() {
             <CardContent className="flex-1 flex flex-col p-0">
               <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[500px]">
                 {messages.map((msg) => (
-                  <div key={msg.id} className={`flex \${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[85%] rounded-xl p-3 \${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                  <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[85%] rounded-xl p-3 ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                       <div className="whitespace-pre-wrap text-sm leading-relaxed">{parseMarkdown(msg.content)}</div>
                     </div>
                   </div>

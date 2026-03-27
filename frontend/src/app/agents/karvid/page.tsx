@@ -242,7 +242,7 @@ export default function KarVidPage() {
                     <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
                       
                       {result.savings > 0 && (
-                        <div className={`p-4 rounded-lg flex items-center gap-3 \${result.recommendation === 'new' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>
+                        <div className={`p-4 rounded-lg flex items-center gap-3 ${result.recommendation === 'new' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>
                           <Badge className={result.recommendation === 'new' ? 'bg-green-600' : 'bg-blue-600'}>
                             KARVID RECOMMENDS
                           </Badge>
@@ -256,7 +256,7 @@ export default function KarVidPage() {
                       <div className="flex items-end justify-center gap-12 h-56 pt-4 border-b">
                         <div className="flex flex-col items-center flex-1 max-w-[120px]">
                           <div className="w-full rounded-t-lg bg-slate-300 relative group transition-all" 
-                               style={{ height: `\${Math.max(5, (result.oldRegime / Math.max(result.oldRegime, result.newRegime)) * 100)}%` }}>
+                               style={{ height: `${Math.max(5, (result.oldRegime / Math.max(1, result.oldRegime, result.newRegime)) * 100)}%` }}>
                             <div className="absolute -top-8 w-full text-center font-bold text-sm">{formatCurrency(result.oldRegime)}</div>
                           </div>
                           <span className="mt-4 font-semibold text-muted-foreground">Old Regime</span>
@@ -264,7 +264,7 @@ export default function KarVidPage() {
 
                         <div className="flex flex-col items-center flex-1 max-w-[120px]">
                           <div className="w-full rounded-t-lg bg-green-400 relative group transition-all" 
-                               style={{ height: `\${Math.max(5, (result.newRegime / Math.max(result.oldRegime, result.newRegime)) * 100)}%` }}>
+                               style={{ height: `${Math.max(5, (result.newRegime / Math.max(1, result.oldRegime, result.newRegime)) * 100)}%` }}>
                             <div className="absolute -top-8 w-full text-center font-bold text-sm">{formatCurrency(result.newRegime)}</div>
                           </div>
                           <span className="mt-4 font-semibold text-green-700">New Regime</span>
@@ -294,8 +294,8 @@ export default function KarVidPage() {
             <CardContent className="flex-1 flex flex-col p-0">
               <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[500px]">
                 {messages.map((msg) => (
-                  <div key={msg.id} className={`flex \${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[85%] rounded-xl p-3 \${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                  <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[85%] rounded-xl p-3 ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                       <div className="whitespace-pre-wrap text-sm leading-relaxed">{parseMarkdown(msg.content)}</div>
                     </div>
                   </div>

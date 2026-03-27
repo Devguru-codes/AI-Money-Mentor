@@ -82,6 +82,7 @@
 | Layer | Technology | Purpose |
 |-------|------------|---------|
 | **Frontend** | Next.js 16, React 19, TypeScript | App Router, SSR/SSG |
+| **State** | Zustand + `useLocalStorage` | Persistent Form Caching |
 | **Styling** | Tailwind CSS v4, shadcn/ui | Responsive UI components |
 | **Backend** | FastAPI, Python 3.12 | REST API with 20+ endpoints |
 | **Database** | Prisma 5, SQLite | User profiles, portfolios, chat history |

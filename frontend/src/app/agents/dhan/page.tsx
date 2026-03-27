@@ -98,9 +98,12 @@ export default function DhanPage() {
     try {
       const { monthlyIncome, monthlyExpenses, emergencyFund, totalDebt, investments, age } = formData
       
-      const savingsRate = ((monthlyIncome - monthlyExpenses) / monthlyIncome) * 100
-      const emergencyMonths = emergencyFund / monthlyExpenses
-      const debtToIncome = (totalDebt / (monthlyIncome * 12)) * 100
+      const safeIncome = Math.max(1, monthlyIncome)
+      const safeExpenses = Math.max(1, monthlyExpenses)
+      
+      const savingsRate = ((monthlyIncome - monthlyExpenses) / safeIncome) * 100
+      const emergencyMonths = emergencyFund / safeExpenses
+      const debtToIncome = (totalDebt / (safeIncome * 12)) * 100
       
       let score = 0
       
@@ -119,13 +122,13 @@ export default function DhanPage() {
       else if (debtToIncome <= 60) score += 10
       else if (debtToIncome <= 80) score += 5
       
-      const investmentRatio = investments / (monthlyIncome * 12)
+      const investmentRatio = investments / (safeIncome * 12)
       if (investmentRatio >= 3) score += 20
       else if (investmentRatio >= 2) score += 15
       else if (investmentRatio >= 1) score += 10
       else if (investmentRatio >= 0.5) score += 5
       
-      const actualMultiple = investments / (monthlyIncome * 12)
+      const actualMultiple = investments / (safeIncome * 12)
       if (actualMultiple >= age * 0.1) score += 20
       else if (actualMultiple >= age * 0.05) score += 15
       else if (actualMultiple >= age * 0.03) score += 10
@@ -151,12 +154,12 @@ export default function DhanPage() {
           emergency: Math.min(20, Math.floor(emergencyMonths * 3.33)),
           debt: debtToIncome <= 20 ? 20 : Math.max(0, 20 - Math.floor((debtToIncome - 20) / 4)),
           investment: Math.min(20, Math.floor(investmentRatio * 6.67)),
-          age: Math.min(20, Math.floor(actualMultiple / (age * 0.005))),
+          age: Math.min(20, Math.floor(actualMultiple / (Math.max(1, age) * 0.005))),
         }
       })
 
       // Alert AI context
-      handleSendMessage(`I just generated my financial health score. My overall score is \${finalScore}/100. I have \${emergencyMonths.toFixed(1)} months of emergency savings, a \${debtToIncome.toFixed(1)}% Debt-to-Income ratio, and a savings rate of \${savingsRate.toFixed(1)}%. What actionable steps should I take to improve these specific bottlenecks over the next quarter?`)
+      handleSendMessage(`I just generated my financial health score. My overall score is ${finalScore}/100. I have ${emergencyMonths.toFixed(1)} months of emergency savings, a ${debtToIncome.toFixed(1)}% Debt-to-Income ratio, and a savings rate of ${savingsRate.toFixed(1)}%. What actionable steps should I take to improve these specific bottlenecks over the next quarter?`)
 
     } finally {
       setCalculating(false)
@@ -240,7 +243,7 @@ export default function DhanPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-center mb-6">
-                    <p className={`text-6xl font-bold \${getScoreColor(result.overallScore)}`}>
+                    <p className={`text-6xl font-bold ${getScoreColor(result.overallScore)}`}>
                       {result.overallScore}
                     </p>
                     <p className="text-xl text-muted-foreground mt-2">{getScoreLabel(result.overallScore)}</p>
@@ -303,8 +306,8 @@ export default function DhanPage() {
             <CardContent className="flex-1 flex flex-col p-0">
               <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[500px]">
                 {messages.map((msg) => (
-                  <div key={msg.id} className={`flex \${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[85%] rounded-xl p-3 \${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                  <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[85%] rounded-xl p-3 ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                       <div className="whitespace-pre-wrap text-sm leading-relaxed">{parseMarkdown(msg.content)}</div>
                     </div>
                   </div>

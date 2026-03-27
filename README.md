@@ -19,42 +19,42 @@
 
 ## 🏗️ Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────┐
-│                      Next.js Frontend                           │
-│       Landing • 9 Agent Pages • Auth • Profile                  │
-│                      (Port 3000)                                │
+│                        Next.js Frontend                         │
+│            Landing • 9 Agent Pages • Auth • Profile             │
+│                          (Port 3000)                            │
 └───────────────────────┬─────────────────────────────────────────┘
                         │  BFF Proxy (/api/*)
                         ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                     FastAPI Backend (Port 8000)                  │
+│                   FastAPI Backend (Port 8000)                   │
 │                                                                 │
 │     ┌─────────────────────────────────────────────────┐         │
-│     │          🧠 DhanSarthi (Coordinator)             │         │
-│     │     "The Brain" — routes every user query        │         │
-│     │      to the right specialist agent               │         │
+│     │           DhanSarthi (Coordinator)              │         │
+│     │     "The Brain" - routes every user query       │         │
+│     │         to the right specialist agent           │         │
 │     └──────┬──────┬──────┬──────┬──────┬──────┬───────┘         │
 │            │      │      │      │      │      │                 │
-│       ┌────▼─┐┌───▼──┐┌──▼───┐┌─▼────┐┌▼─────┐┌▼──────┐       │
-│       │KarVid││Yojana││Bazaar││ Dhan ││Nivesh││ Vidhi │       │
-│       │ 🧾   ││ 🎯   ││ 📈   ││ 💪   ││ 📊   ││ ⚖️    │       │
-│       │ Tax  ││ FIRE ││Stock ││Health││  MF  ││Legal │       │
-│       └──────┘└──────┘└──────┘└──────┘└──────┘└──────┘       │
-│       ┌──────────────────┐ ┌──────────────────┐                 │
-│       │ Life Event  🎉   │ │ Couple Planner 💑│                 │
-│       │ Marriage, Baby   │ │ Joint Finance    │                 │
-│       └──────────────────┘ └──────────────────┘                 │
+│       ┌────▼─┐┌───▼──┐┌──▼───┐┌─▼────┐┌▼─────┐┌▼──────┐         │
+│       │KarVid││Yojana││Bazaar││ Dhan ││Nivesh││ Vidhi │         │
+│       │ Tax  ││ FIRE ││Stock ││Health││  MF  ││ Legal │         │
+│       └──────┘└──────┘└──────┘└──────┘└──────┘└───────┘         │
 │                                                                 │
-└──────────────────────┬──────────────────────────────────────────┘
-                       │
-            ┌──────────▼──────────┐
-            │  OpenClaw Gateway   │
-            │  (Agent Swarm)      │
-            │                     │
-            │  Ollama / GLM-5     │
-            │  (LLM Inference)    │
-            └─────────────────────┘
+│       ┌──────────────────┐      ┌──────────────────┐            │
+│       │   Life Event     │      │  Couple Planner  │            │
+│       │ Marriage, Baby   │      │  Joint Finance   │            │
+│       └──────────────────┘      └──────────────────┘            │
+│                                                                 │
+└───────────────────────┬─────────────────────────────────────────┘
+                        │
+             ┌──────────▼──────────┐
+             │  OpenClaw Gateway   │
+             │   (Agent Swarm)     │
+             │                     │
+             │   Ollama / GLM-5    │
+             │   (LLM Inference)   │
+             └─────────────────────┘
 ```
 
 > **How it works:** User sends a query → **DhanSarthi** analyzes intent → delegates to the right specialist agent (e.g., tax question → KarVid, retirement → Yojana) → returns the combined response. All delegation is handled via the **OpenClaw multi-agent swarm** protocol.

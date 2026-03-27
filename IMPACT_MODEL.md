@@ -130,7 +130,8 @@ At average 12% XIRR over 10 years:
 ## 6. Consolidated Impact Summary
 
 ```mermaid
-pie title Annual Impact at 1M Users in Crore Rupees
+pie showData
+    title Annual Impact at 1M Users in Crore Rupees
     "Time Savings Tax and Portfolio" : 472
     "Tax Regime Optimization" : 592
     "CA and CFP Fees Displaced" : 445
@@ -154,7 +155,7 @@ pie title Annual Impact at 1M Users in Crore Rupees
 
 ```mermaid
 mindmap
-  root(AI Money Mentor Social Impact)
+  root(("AI Money Mentor Social Impact"))
     Financial Literacy
       Tax education for first-time filers
       SIP and XIRR awareness

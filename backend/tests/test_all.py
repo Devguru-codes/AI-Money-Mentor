@@ -126,21 +126,21 @@ def test_karvid():
     # Test 4: 80C Deductions
     print("\n[TEST 4] 80C Deductions")
     try:
-        from agents.karvid import Deduction80C, calculate_80c_deduction
+        from agents.karvid.deductions import calculate_80c_deduction
         
         deductions = {
             'ppf': 150000,
             'elss': 50000,
-            'insurance': 30000,
+            'life_insurance_premium': 30000,
         }
         
-        result = calculate_80c_deduction(deductions)
-        total_80c = result.get("total_eligible", result.get("total_claimed", 0))
-        eligible = result.get("eligible", result.get("eligible_deduction", 0))
-        excess = result.get("excess", result.get("amount_over_limit", 0))
-        print(f"  ✅ Total 80C claimed: ₹{result['total_claimed']:,.0f}")
-        print(f"  ✅ Eligible deduction: ₹{result['eligible']:,.0f}")
-        print(f"  ✅ Excess over limit: ₹{result['excess']:,.0f}")
+        result = calculate_80c_deduction(**deductions)
+        total_claimed = result.get("total_claimed", 0)
+        eligible = result.get("allowed_deduction", 0)
+        excess = max(0, total_claimed - eligible)
+        print(f"  ✅ Total 80C claimed: ₹{total_claimed:,.0f}")
+        print(f"  ✅ Eligible deduction: ₹{eligible:,.0f}")
+        print(f"  ✅ Excess over limit: ₹{excess:,.0f}")
     except Exception as e:
         print(f"  ❌ Error: {e}")
         return False
@@ -148,12 +148,12 @@ def test_karvid():
     # Test 5: Capital Gains
     print("\n[TEST 5] Capital Gains Tax")
     try:
-        from agents.karvid import calculate_equity_ltcg
+        from agents.karvid.capital_gains import calculate_equity_ltcg
         
         # LTCG on equity above ₹1.25L exemption
-        result = calculate_equity_ltcg(gain=200000)
-        print(f"  ✅ LTCG on ₹2L gain: ₹{result['tax']:,.0f} tax")
-        print(f"  ✅ Exemption used: ₹{result['exemption']:,.0f}")
+        result = calculate_equity_ltcg(sale_price=300000, purchase_price=100000, days_held=400)
+        print(f"  ✅ LTCG on ₹2L gain: ₹{result.tax_amount:,.0f} tax")
+        print(f"  ✅ Exemption used: ₹{result.exemption:,.0f}")
     except Exception as e:
         print(f"  ❌ Error: {e}")
         return False
@@ -243,15 +243,15 @@ def test_bazaarguru():
     print("TESTING BAZAARGURU (Market Research)")
     print("="*60)
     
-    from agents.bazaar.stock_data import NSEDataFetcher, StockScreener, StockQuote
+    from agents.bazaar.stock_data import StockData, StockQuote, MOCK_STOCKS
     
-    # Test 1: NSE Data Fetcher Initialization
-    print("\n[TEST 1] NSE Data Fetcher")
+    # Test 1: Stock Data Initializer
+    print("\n[TEST 1] Stock Data")
     try:
-        nse = NSEDataFetcher()
-        print(f"  ✅ NSEDataFetcher initialized")
-        print(f"  ✅ Popular stocks: {len(nse.POPULAR_STOCKS)} stocks")
-        print(f"  ✅ NIFTY 50: {len(nse.NIFTY_50)} stocks")
+        sd = StockData()
+        print(f"  ✅ StockData initialized")
+        print(f"  ✅ MOCK_STOCKS length: {len(MOCK_STOCKS)} stocks")
+        print(f"  ✅ NIFTY_50: {len(StockData.NIFTY_50)} stocks")
     except Exception as e:
         print(f"  ❌ Error: {e}")
         return False
@@ -259,8 +259,7 @@ def test_bazaarguru():
     # Test 2: Stock Quote (Note: May fail without network)
     print("\n[TEST 2] Stock Quote Fetch")
     try:
-        # Note: This requires network access to NSE
-        quote = nse.get_quote("RELIANCE")
+        quote = sd.get_quote("RELIANCE")
         if quote:
             print(f"  ✅ RELIANCE: ₹{quote.price:,.2f} ({quote.change_percent:+.2f}%)")
         else:
@@ -268,13 +267,12 @@ def test_bazaarguru():
     except Exception as e:
         print(f"  ⚠️ Network error (expected without internet): {e}")
     
-    # Test 3: Stock Screener
-    print("\n[TEST 3] Stock Screener")
+    # Test 3: Market Overview
+    print("\n[TEST 3] Market Overview")
     try:
-        screener = StockScreener()
-        print(f"  ✅ StockScreener initialized")
-        print(f"  ✅ Can screen by P/E ratio")
-        print(f"  ✅ Can screen by Market Cap")
+        overview = sd.get_market_overview()
+        print(f"  ✅ Market overview fetched")
+        print(f"  ✅ Nifty value: {overview['nifty']['value']}")
     except Exception as e:
         print(f"  ❌ Error: {e}")
         return False
@@ -282,10 +280,10 @@ def test_bazaarguru():
     # Test 4: Popular Stocks List
     print("\n[TEST 4] Popular Stocks")
     try:
-        popular = NSEDataFetcher.POPULAR_STOCKS[:5]
+        popular = list(MOCK_STOCKS.keys())[:5]
         print(f"  ✅ Top 5 Popular: {', '.join(popular)}")
         
-        nifty_50_count = len(NSEDataFetcher.NIFTY_50)
+        nifty_50_count = len(StockData.NIFTY_50)
         print(f"  ✅ NIFTY 50 stocks: {nifty_50_count}")
     except Exception as e:
         print(f"  ❌ Error: {e}")

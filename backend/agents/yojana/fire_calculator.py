@@ -153,8 +153,7 @@ class FIRECalculator:
         Returns:
             Required monthly SIP amount
         """
-        if years is None:
-            target_years = self.retirement_age - self.current_age
+        target_years = years if years is not None else self.retirement_age - self.current_age
         
         target_corpus = self.calculate_inflation_adjusted_corpus() - self.current_corpus
         monthly_return = self.expected_return / 12

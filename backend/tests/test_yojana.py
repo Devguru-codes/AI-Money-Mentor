@@ -1,6 +1,7 @@
 """Test YojanaKarta FIRE Planner"""
 import sys
-sys.path.insert(0, '/home/ubuntu/ai-money-mentor')
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from agents.yojana.fire_calculator import FIRECalculator, calculate_fire_number_india, get_sip_recommendation
 

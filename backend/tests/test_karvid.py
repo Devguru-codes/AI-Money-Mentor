@@ -1,6 +1,7 @@
 """Test KarVid Tax Wizard"""
 import sys
-sys.path.insert(0, '/home/ubuntu/ai-money-mentor')
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from agents.karvid import (
     KarVidTaxCalculator, 
@@ -71,10 +72,10 @@ def test_capital_gains():
     """Test Capital Gains"""
     print("\n[TEST 5] Capital Gains Tax")
     
-    # LTCG on equity above ₹1.25L exemption
-    result = calculate_equity_ltcg(gain=200000)
-    print(f"  ✅ LTCG on ₹2L gain: ₹{result['tax']:,.0f} tax")
-    print(f"  ✅ Exemption used: ₹{result['exemption']:,.0f}")
+    # LTCG on equity above ₹1.25L exemption (gain=200,000)
+    result = calculate_equity_ltcg(sale_price=300000, purchase_price=100000, days_held=400)
+    print(f"  ✅ LTCG on ₹2L gain: ₹{result.tax_amount:,.0f} tax")
+    print(f"  ✅ Exemption used: ₹{result.exemption:,.0f}")
     
     return True
 

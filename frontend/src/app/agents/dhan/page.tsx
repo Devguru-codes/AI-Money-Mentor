@@ -160,6 +160,7 @@ export default function DhanPage() {
 
       // Update dashboard state
       localStorage.setItem('dashboard_health', finalScore.toString())
+      window.dispatchEvent(new Event("storage"))
 
       // Alert AI context
       handleSendMessage(`I just generated my financial health score. My overall score is ${finalScore}/100. I have ${emergencyMonths.toFixed(1)} months of emergency savings, a ${debtToIncome.toFixed(1)}% Debt-to-Income ratio, and a savings rate of ${savingsRate.toFixed(1)}%. What actionable steps should I take to improve these specific bottlenecks over the next quarter?`)

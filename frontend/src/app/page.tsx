@@ -119,12 +119,17 @@ export default function Home() {
     }
     
     // Read from local storage
-    setDashboardData({
-      portfolioValue: parseFloat(localStorage.getItem('dashboard_portfolio') || '0'),
-      taxSaved: parseFloat(localStorage.getItem('dashboard_tax_saved') || '0'),
-      fireProgress: parseFloat(localStorage.getItem('dashboard_fire') || '0'),
-      healthScore: parseFloat(localStorage.getItem('dashboard_health') || '0')
-    })
+    const loadDashboardData = () => {
+      setDashboardData({
+        portfolioValue: parseFloat(localStorage.getItem('dashboard_portfolio') || '0'),
+        taxSaved: parseFloat(localStorage.getItem('dashboard_tax_saved') || '0'),
+        fireProgress: parseFloat(localStorage.getItem('dashboard_fire') || '0'),
+        healthScore: parseFloat(localStorage.getItem('dashboard_health') || '0')
+      })
+    }
+    
+    loadDashboardData()
+    window.addEventListener("storage", loadDashboardData)
     
     setIsLoading(false)
 
@@ -135,6 +140,9 @@ export default function Home() {
         else setBackendStatus("offline")
       })
       .catch(() => setBackendStatus("offline"))
+      
+    // Cleanup listener
+    return () => window.removeEventListener("storage", loadDashboardData)
   }, [])
 
   const formatCurrency = (value: number) => {

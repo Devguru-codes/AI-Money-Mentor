@@ -105,7 +105,7 @@ export default function BazaarPage() {
       toast.success(`Successfully fetched ${searchTarget}`)
 
       // Send context to AI
-      handleSendMessage(`I just pulled up real-time quotes for ${data.name} (${data.symbol}). It is currently trading at ₹${data.price} with a P/E Ratio of ${data.pe}. Can you give me a structural analysis of this company? Should I buy, hold, or sell at this valuation?`)
+      handleSendMessage(`I just pulled up real-time quotes for ${data.name} (${data.symbol}). It is currently trading at ₹${data.price} with a P/E Ratio of ${data.pe_ratio}. Can you give me a structural analysis of this company? Should I buy, hold, or sell at this valuation?`)
 
     } catch (error) {
       setResult(null)

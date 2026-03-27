@@ -117,12 +117,17 @@ export default function KarVidPage() {
       const oldTax = data.tax_old || calculateOldRegime(formData)
       const newTax = data.tax_new || calculateNewRegime(formData.grossIncome)
       
+      const oldTaxValue = oldTax?.total || oldTax
       const resObj = {
-        oldRegime: oldTax?.total || oldTax,
+        oldRegime: oldTaxValue,
         newRegime: newTax,
-        recommendation: data.recommendation || "new",
-        savings: Math.abs(newTax - (oldTax?.total || oldTax)),
+        recommendation: newTax <= oldTaxValue ? "new" : "old",
+        savings: Math.abs(newTax - oldTaxValue),
       }
+      
+      // Save for homepage dashboard
+      localStorage.setItem("dashboard_tax_saved", resObj.savings.toString())
+
       setResult(resObj)
       toast.success("Tax calculated successfully!")
       setActiveTab("compare")

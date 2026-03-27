@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import ClientLayout from "@/components/ClientLayout"
+import NextTopLoader from "nextjs-toploader"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 
@@ -21,6 +22,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} font-sans min-h-screen flex flex-col antialiased bg-background text-foreground`}
       >
+        <NextTopLoader color="#8b5cf6" showSpinner={false} />
         <ClientLayout>{children}</ClientLayout>
       </body>
     </html>

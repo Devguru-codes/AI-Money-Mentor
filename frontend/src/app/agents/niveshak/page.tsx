@@ -130,6 +130,10 @@ export default function NiveshakPage() {
           sharpeRatio: data.risk_metrics?.sharpe_ratio || 0,
           holdings: data.holdings,
         })
+        
+        // Save for homepage dashboard
+        localStorage.setItem("dashboard_portfolio", data.total_value.toString())
+
 
         // Also ping the AI
         handleSendMessage(`I just updated my portfolio analysis. I have ${validHoldings.length} funds totaling ₹${data.total_value} with an XIRR of ${data.xirr_percent}%. Can you give me a personalized review of this allocation? Note my funds: ${validHoldings.map(h => h.name).join(', ')}.`)

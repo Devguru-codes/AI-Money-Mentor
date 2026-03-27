@@ -105,11 +105,27 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
   const [backendStatus, setBackendStatus] = useState<"checking" | "online" | "offline">("checking")
 
+  const [dashboardData, setDashboardData] = useState({
+    portfolioValue: 0,
+    taxSaved: 0,
+    fireProgress: 0,
+    healthScore: 0
+  })
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user")
     if (storedUser) {
       setUser(JSON.parse(storedUser))
     }
+    
+    // Read from local storage
+    setDashboardData({
+      portfolioValue: parseFloat(localStorage.getItem('dashboard_portfolio') || '0'),
+      taxSaved: parseFloat(localStorage.getItem('dashboard_tax_saved') || '0'),
+      fireProgress: parseFloat(localStorage.getItem('dashboard_fire') || '0'),
+      healthScore: parseFloat(localStorage.getItem('dashboard_health') || '0')
+    })
+    
     setIsLoading(false)
 
     // Check backend status
@@ -188,7 +204,7 @@ export default function Home() {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-blue-700">
-              {user ? formatCurrency(0) : "—"}
+              {user ? formatCurrency(dashboardData.portfolioValue) : "—"}
             </p>
           </CardContent>
         </Card>
@@ -201,7 +217,7 @@ export default function Home() {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-green-700">
-              {user ? formatCurrency(0) : "—"}
+              {user ? formatCurrency(dashboardData.taxSaved) : "—"}
             </p>
           </CardContent>
         </Card>
@@ -214,7 +230,7 @@ export default function Home() {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-orange-700">
-              {user ? "0%" : "—"}
+              {user ? `${dashboardData.fireProgress.toFixed(0)}%` : "—"}
             </p>
           </CardContent>
         </Card>
@@ -227,7 +243,7 @@ export default function Home() {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-purple-700">
-              {user ? "-/100" : "—"}
+              {user ? `${dashboardData.healthScore > 0 ? dashboardData.healthScore : '-'}/100` : "—"}
             </p>
           </CardContent>
         </Card>

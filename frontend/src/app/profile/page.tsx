@@ -17,8 +17,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user')
-    const isLoggedIn = localStorage.getItem('isLoggedIn')
-    if (!storedUser || isLoggedIn !== 'true') {
+    if (!storedUser) {
       router.push('/login')
       return
     }

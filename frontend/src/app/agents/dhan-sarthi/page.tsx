@@ -130,6 +130,30 @@ export default function DhanSarthiPage() {
     return 'anonymous'
   }
 
+  const simulateStreaming = async (fullText: string, agentId: string) => {
+    const newMessageId = String(Date.now() + 1)
+    setMessages((prev) => [...prev, {
+      id: newMessageId,
+      role: "assistant",
+      content: "",
+      agent: agentId,
+      timestamp: new Date(),
+    }])
+    
+    // Split efficiently: keep spaces on words so we can stitch 
+    const words = fullText.match(/(\S+\s+)|(\S+)/g) || [fullText]
+    let currentText = ""
+    
+    for (let i = 0; i < words.length; i++) {
+        currentText += words[i]
+        setMessages((prev) => prev.map(m => 
+            m.id === newMessageId ? { ...m, content: currentText } : m
+        ))
+        // Small delay to simulate streaming UX (20ms)
+        await new Promise(r => setTimeout(r, 20))
+    }
+  }
+
   const handleSend = async () => {
     if (!input.trim() || loading) return
 
@@ -169,13 +193,8 @@ export default function DhanSarthiPage() {
         const aiResponse = data.response || "I'm processing your request. Please try again."
         const agentId = data.agent || "dhan-sarthi"
 
-        setMessages((prev) => [...prev, {
-          id: String(Date.now() + 1),
-          role: "assistant",
-          content: aiResponse,
-          agent: agentId,
-          timestamp: new Date(),
-        }])
+        await simulateStreaming(aiResponse, agentId)
+
 
         saveChat(query, aiResponse, agentId)
       } else {

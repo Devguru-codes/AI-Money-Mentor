@@ -8,6 +8,7 @@ from typing import Dict, List, Optional
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 import random
+import yfinance as yf
 
 
 @dataclass
@@ -136,45 +137,51 @@ class StockData:
     
     def get_quote(self, symbol: str) -> Optional[StockQuote]:
         """
-        Get stock quote - tries NSE API first, falls back to mock data
+        Get stock quote - tries yfinance first, falls back to mock data
         """
-        symbol = symbol.upper().strip()
+        original_symbol = symbol.upper().strip()
         
-        # First try mock data (reliable for demo)
-        mock_quote = get_mock_quote(symbol)
-        if mock_quote:
-            return mock_quote
-        
-        # Try NSE API (may fail due to rate limits)
-        try:
-            url = f"https://www.nseindia.com/api/quote-equity?symbol={symbol}"
-            response = self.session.get(url, timeout=5)
+        # Determine yfinance symbol (add .NS for Indian stocks if not present)
+        yf_symbol = original_symbol
+        if not yf_symbol.endswith('.NS') and not yf_symbol.endswith('.BO'):
+            yf_symbol = f"{yf_symbol}.NS"
             
-            if response.status_code == 200:
-                data = response.json()
-                price_info = data.get('priceInfo', {})
-                metadata = data.get('metadata', {})
+        try:
+            ticker = yf.Ticker(yf_symbol)
+            info = ticker.info
+            
+            # Extract current price safely
+            price = info.get('currentPrice') or info.get('regularMarketPrice') or info.get('previousClose', 0)
+            if price:
+                prev_close = info.get('previousClose', price)
+                change = price - prev_close
+                change_percent = (change / prev_close * 100) if prev_close else 0
+                
+                # Yahoo Finance uses pure numeric Market Cap directly (e.g. 2894906754672).
+                # Convert explicitly to Crores (Cr) so it fits beautifully into the UI without looking bizarrely huge.
+                market_cap_raw = info.get('marketCap')
+                market_cap_cr = round(market_cap_raw / 10**7, 2) if market_cap_raw else None
                 
                 return StockQuote(
-                    symbol=symbol,
-                    name=metadata.get('companyName', symbol),
-                    price=float(price_info.get('lastPrice', 0)),
-                    change=float(price_info.get('change', 0)),
-                    change_percent=float(price_info.get('pChange', 0)),
-                    open=float(price_info.get('open', 0)),
-                    high=float(price_info.get('intraDayHighLow', {}).get('max', 0)),
-                    low=float(price_info.get('intraDayHighLow', {}).get('min', 0)),
-                    volume=int(data.get('securityWiseDP', {}).get('quantityTraded', 0)),
-                    pe_ratio=float(metadata.get('pdSymbolPe', 0)) if metadata.get('pdSymbolPe') else None,
-                    market_cap=float(metadata.get('marketCapitalization', 0)) if metadata.get('marketCapitalization') else None,
-                    fifty_two_week_high=float(price_info.get('weekHighLow', {}).get('max', 0)),
-                    fifty_two_week_low=float(price_info.get('weekHighLow', {}).get('min', 0))
+                    symbol=original_symbol,
+                    name=info.get('longName', original_symbol),
+                    price=round(float(price), 2),
+                    change=round(float(change), 2),
+                    change_percent=round(float(change_percent), 2),
+                    open=round(float(info.get('open', price)), 2),
+                    high=round(float(info.get('dayHigh', price)), 2),
+                    low=round(float(info.get('dayLow', price)), 2),
+                    volume=int(info.get('volume', 0)),
+                    pe_ratio=round(float(info.get('trailingPE')), 2) if info.get('trailingPE') else None,
+                    market_cap=market_cap_cr,
+                    fifty_two_week_high=round(float(info.get('fiftyTwoWeekHigh', 0)), 2),
+                    fifty_two_week_low=round(float(info.get('fiftyTwoWeekLow', 0)), 2)
                 )
         except Exception:
             pass
-        
-        # Return None if not found
-        return None
+            
+        # Fallback to mock data ONLY if yfinance fails
+        return get_mock_quote(original_symbol)
     
     def get_market_overview(self) -> Dict:
         """Get market overview (NIFTY, SENSEX)"""

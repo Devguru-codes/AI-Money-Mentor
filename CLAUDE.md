@@ -57,9 +57,9 @@ AI Money Mentor is an **AI-First Financial Swarm** built on a decoupled architec
 | **DhanSarthi** | `backend/agents/dhan_sarthi/coordinator.py` | **Scoring Algorithm**: Keyword-based intent classification. Priority rules ensure `LIFE_EVENT` (boost +3.0) isn't swallowed by generic `NIVESHAK` queries. |
 | **KarVid** | `backend/agents/karvid/tax_calculator.py` | **Indian Tax Slabs**: Implements New vs Old regime (FY 2025-26). `Section 87A Rebate` (Income < 7L). `Standard Deduction` (50k/75k). |
 | **YojanaKarta** | `backend/agents/yojana/fire_calculator.py` | **FIRE Corp**: `(Annual Exp / 0.04)`. **SIP Calculation**: `PV = PMT * [(1+r)^n - 1] / r`. Includes inflation indexing (def 6%). |
-| **BazaarGuru** | `backend/agents/bazaar/stock_data.py` | **Data Sourcing**: NSE API (Scraper) -> Falling back to `MOCK_STOCKS` dictionary with ±3% randomized intra-day noise. |
+| **BazaarGuru** | `backend/agents/bazaar/stock_data.py` | **Data Sourcing**: Direct `yfinance` realtime extraction with strict `NaN` boundary sanitation and normalized mathematical string padding in Crores (Cr). |
 | **DhanRaksha** | `backend/agents/dhan/health_score.py` | **Weighted Audit**: Emergency (15%), Debt (15%), Savings (20%), Investment (20%), Insurance (10%), Retirement (10%), Credit (5%), Expense Ratio (5%). |
-| **Niveshak** | `backend/agents/niveshak/portfolio_analyzer.py`| **XIRR Engine**: Newton-Raphson approximation of the equation `Sum[C_t / (1+r)^(d_t/365)] = 0`. Sharpe Ratio: `(R_p - R_f) / σ_p`. |
+| **Niveshak** | `backend/agents/niveshak/portfolio_analyzer.py`| **XIRR Engine**: Newton-Raphson approximation dynamically extracting historical cash flows from absolute user-provided `SIP` and `Month` durations instead of flat mocking. Sharpe Ratio: `(R_p - R_f) / σ_p`. |
 | **Vidhi** | `backend/agents/vidhi/compliance.py` | **Regulatory Knowledge**: SEBI (Investment Advisers) Regulations, 2013. I-T Act Sections (Section 10, 80). |
 | **Life Event** | `backend/agents/life_event/__init__.py` | **Life Costing**: Marriage (15L), Child (20L), Education (1Cr). `FV = PV * (1+i)^n` where `i` is historical cost inflation (10% for education). |
 | **Couple Plan** | `backend/agents/couple_planner/__init__.py` | **Joint Splitting**: Proportional (`Inc1/Total`), Equal (`50/50`), or Custom. 50/30/20 budget automation for joint households. |
@@ -123,4 +123,4 @@ AI Money Mentor is an **AI-First Financial Swarm** built on a decoupled architec
 
 ---
 
-*Project AI Money Mentor — Last Updated: March 27, 2026 — v4.0 "The Source of Truth"*
+*Project AI Money Mentor — Last Updated: March 28, 2026 — v4.0 "The Source of Truth"*

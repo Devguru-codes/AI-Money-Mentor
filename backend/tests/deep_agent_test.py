@@ -87,7 +87,17 @@ test("Dhan: high earner", "POST", "/dhan/health-score",
 # Bazaar
 print("\n--- Bazaar (Stocks) ---")
 test("Bazaar: TCS stock", "POST", "/bazaar/stock-quote", {"symbol": "TCS"})
+test("Bazaar: RELIANCE stock", "POST", "/bazaar/stock-quote", {"symbol": "RELIANCE"})
 test("Bazaar: fake stock", "POST", "/bazaar/stock-quote", {"symbol": "NOTASTOCK123"})
+
+# Niveshak
+print("\n--- Niveshak (Portfolio) ---")
+test("Niveshak: Basic SIP XIRR", "POST", "/niveshak/analyze", 
+     {"holdings": [{"name": "HDFC Mid-Cap", "units": 100, "nav": 150, "allocation": 100}], 
+      "sipAmount": 5000, "durationMonths": 24})
+test("Niveshak: High Value XIRR", "POST", "/niveshak/analyze", 
+     {"holdings": [{"name": "SBI Bluechip", "units": 500, "nav": 200, "allocation": 100}], 
+      "sipAmount": 20000, "durationMonths": 60})
 
 # Life Event edge
 print("\n--- Life Event ---")

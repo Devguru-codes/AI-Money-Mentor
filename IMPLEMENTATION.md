@@ -132,6 +132,12 @@ Next.js 16 (Port 3000) → BFF Proxy (/api/*) → FastAPI (Port 8000) → OpenCl
 11. **Context-Aware Proxy:** Calculations silently pass resulting JSON via `/api/bridge/chat` for immediate AI context evaluation.
 12. **Universal Markdown Parsing:** Flawless `react-markdown` response formatting.
 
+### Production Polish (Version 2.2 - March 28, 2026)
+13. **Niveshak XIRR Matrix**: Replaced 1Y mock holding periods with mathematically accurate array iteration arrays based on exact `Months` + `SIP` inputs.
+14. **BazaarGuru API Sockets**: Hardened the Python `yfinance` interface to serialize massive market caps directly into standard format (`Cr`), eradicating `NaN` frontend crashes.
+15. **OpenClaw Daemon Stability**: Evaluated the PM2 Web-Socket listener to auto-refresh expired GLM-5 pairing sessions, resolving the 2-minute agent timeout hangs.
+16. **Aesthetic Flex Control**: Explicit CSS derivations injected into `KarVid` Regime comparison charts allowing the percentage-based graphical columns to render bounds natively.
+
 ---
 
 ## Testing
@@ -168,4 +174,4 @@ Next.js 16 (Port 3000) → BFF Proxy (/api/*) → FastAPI (Port 8000) → OpenCl
 
 ---
 
-*Last Updated: March 27, 2026*
+*Last Updated: March 28, 2026*

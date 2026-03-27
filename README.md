@@ -69,7 +69,7 @@
 | 2 | **YojanaKarta** 🎯 | FIRE Planner | FIRE number calculation, SIP recommendations, retirement planning |
 | 3 | **BazaarGuru** 📈 | Market Analyst | NSE/BSE stock quotes, top gainers, NIFTY 50 data |
 | 4 | **DhanRaksha** 💪 | Health Scorer | 8-factor financial health score with personalized suggestions |
-| 5 | **Niveshak** 📊 | Portfolio Advisor | Mutual fund XIRR/CAGR, risk metrics, CAS statement parsing |
+| 5 | **Niveshak** 📊 | Portfolio Advisor | Dynamic XIRR iteration arrays, Sharpe Ratio, Risk matrices |
 | 6 | **Vidhi** ⚖️ | Compliance Officer | SEBI regulations, legal disclaimers, financial law lookup |
 | 7 | **DhanSarthi** 🧠 | Coordinator | Routes queries to the right agent via OpenClaw multi-agent swarm |
 | 8 | **Life Event Advisor** 🎉 | Life Planner | Marriage, child birth, education — goal-based SIP planning |

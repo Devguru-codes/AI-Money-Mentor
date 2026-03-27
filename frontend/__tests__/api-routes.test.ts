@@ -99,6 +99,31 @@ describe('Bazaar Stock API', () => {
   })
 })
 
+// ============ NIVESHAK (Portfolio) ============
+
+describe('Niveshak Portfolio API', () => {
+  beforeEach(() => mockFetch.mockClear())
+
+  it('proxies portfolio analysis to backend', async () => {
+    const { POST } = await import('../src/app/api/niveshak/route')
+    mockBackendSuccess({
+      portfolio_value: 150000,
+      estimated_xirr: 24.5,
+      sharpe_ratio: 1.2
+    })
+
+    const res = await POST(createMockRequest({
+      holdings: [{ name: 'HDFC', units: 100, nav: 1500, allocation: 100 }],
+      sipAmount: 5000,
+      durationMonths: 24
+    }))
+    const data = await res.json()
+
+    expect(data.portfolio_value).toBe(150000)
+    expect(data.estimated_xirr).toBe(24.5)
+  })
+})
+
 // ============ DHAN (Health Score) ============
 
 describe('Dhan Health Score API', () => {

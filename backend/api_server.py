@@ -271,14 +271,7 @@ async def get_stock_quote(request: StockRequest):
     nse = StockData()
     quote = nse.get_quote(request.symbol)
     if quote:
-        return {
-            "symbol": quote.symbol,
-            "name": quote.name,
-            "price": quote.price,
-            "change": quote.change,
-            "change_percent": quote.change_percent,
-            "volume": quote.volume
-        }
+        return quote.to_dict()
     raise HTTPException(status_code=404, detail=f"Stock {request.symbol} not found")
 
 @app.get("/bazaar/top-gainers")

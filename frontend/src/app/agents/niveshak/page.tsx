@@ -15,6 +15,8 @@ interface Holding {
   name: string
   units: number
   nav: number
+  sipAmount: number
+  durationMonths: number
 }
 
 interface Message {
@@ -25,7 +27,7 @@ interface Message {
 
 export default function NiveshakPage() {
   const [holdings, setHoldings, hasLoaded] = useLocalStorage<Holding[]>("niveshak_holdings", [
-    { name: "Parag Parikh Flexi Cap", units: 100, nav: 85.50 }
+    { name: "Parag Parikh Flexi Cap", units: 100, nav: 85.50, sipAmount: 5000, durationMonths: 12 }
   ])
   const [analyzing, setAnalyzing] = useState(false)
   const [result, setResult] = useState<any>(null)
@@ -49,11 +51,13 @@ export default function NiveshakPage() {
     if (field === 'name') newHoldings[index].name = String(value)
     else if (field === 'units') newHoldings[index].units = parseFloat(String(value)) || 0
     else if (field === 'nav') newHoldings[index].nav = parseFloat(String(value)) || 0
+    else if (field === 'sipAmount') newHoldings[index].sipAmount = parseFloat(String(value)) || 0
+    else if (field === 'durationMonths') newHoldings[index].durationMonths = parseFloat(String(value)) || 0
     setHoldings(newHoldings)
   }
 
   const addHolding = () => {
-    setHoldings([...holdings, { name: "", units: 0, nav: 0 }])
+    setHoldings([...holdings, { name: "", units: 0, nav: 0, sipAmount: 0, durationMonths: 0 }])
   }
 
   const removeHolding = (index: number) => {
@@ -207,6 +211,24 @@ export default function NiveshakPage() {
                       placeholder="0.00" 
                       value={holding.nav || ''} 
                       onChange={(e) => handleHoldingChange(idx, 'nav', e.target.value)} 
+                    />
+                  </div>
+                  <div className="w-28 space-y-2">
+                    <Label className="text-xs text-muted-foreground">SIP (₹)</Label>
+                    <Input 
+                      type="number" 
+                      placeholder="0" 
+                      value={holding.sipAmount || ''} 
+                      onChange={(e) => handleHoldingChange(idx, 'sipAmount', e.target.value)} 
+                    />
+                  </div>
+                  <div className="w-20 space-y-2">
+                    <Label className="text-xs text-muted-foreground">Months</Label>
+                    <Input 
+                      type="number" 
+                      placeholder="0" 
+                      value={holding.durationMonths || ''} 
+                      onChange={(e) => handleHoldingChange(idx, 'durationMonths', e.target.value)} 
                     />
                   </div>
                   <div className="pt-6">

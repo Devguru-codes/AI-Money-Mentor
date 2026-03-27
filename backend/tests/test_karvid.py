@@ -62,8 +62,8 @@ def test_80c():
     # Use keyword arguments
     result = calculate_80c_deduction(ppf=150000, elss=50000, life_insurance_premium=30000)
     print(f"  ✅ Total 80C claimed: ₹{result['total_claimed']:,.0f}")
-    print(f"  ✅ Eligible deduction: ₹{result['max_deduction']:,.0f}")
-    print(f"  ✅ Excess over limit: ₹{result.get('excess_amount', 0):,.0f}")
+    print(f"  ✅ Eligible deduction: ₹{result['allowed_deduction']:,.0f}")
+    print(f"  ✅ Unused limit: ₹{result['unused_limit']:,.0f}")
     
     return True
 

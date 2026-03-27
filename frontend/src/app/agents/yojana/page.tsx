@@ -125,6 +125,10 @@ export default function YojanaPage() {
       setResult(fireResult)
       toast.success("FIRE number calculated!")
 
+      // Update dashboard state
+      const fireProgressPercent = Math.min(100, Math.max(0, (formData.currentSavings / fireResult.fireNumber) * 100))
+      localStorage.setItem('dashboard_fire', fireProgressPercent.toString())
+
       // AI Context Update
       handleSendMessage(`I just ran a calculation. I plan to retire in ${fireResult.yearsToRetire} years. My target inflation-adjusted corpus is ₹${formatRupees(fireResult.inflationAdjusted)} requiring a monthly SIP of ₹${formatCurrency(fireResult.monthlySIP)}. How feasible is this considering 12% equity returns? Can you suggest an asset allocation?`)
 

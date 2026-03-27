@@ -202,7 +202,7 @@ export default function BazaarPage() {
                     <div className="text-right">
                       <p className="text-3xl font-bold font-mono tracking-tight">{formatCurrency(result.price)}</p>
                       <Badge className={`mt-1 ${result.change >= 0 ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"}`}>
-                        {result.change >= 0 ? "▲" : "▼"} {Math.abs(result.change || 0).toFixed(2)} ({(result.changePercent || 0).toFixed(2)}%)
+                        {result.change >= 0 ? "▲" : "▼"} {Math.abs(result.change || 0).toFixed(2)} ({(result.change_percent || 0).toFixed(2)}%)
                       </Badge>
                     </div>
                   </div>
@@ -223,13 +223,13 @@ export default function BazaarPage() {
                     </div>
                     <div className="p-4 bg-muted/40 rounded-xl border">
                       <p className="text-xs text-muted-foreground font-medium mb-1">P/E Ratio</p>
-                      <p className="text-lg font-semibold font-mono">{(result.pe || 0).toFixed(2)}</p>
+                      <p className="text-lg font-semibold font-mono">{(result.pe_ratio || 0).toFixed(2)}</p>
                     </div>
                   </div>
                   
                   <div className="mt-4 p-4 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border">
                     <p className="text-xs text-muted-foreground font-medium mb-1">Market Capitalization</p>
-                    <p className="text-3xl font-bold text-slate-700">₹{formatNumber(result.marketCap * 10000000)}</p>
+                    <p className="text-3xl font-bold text-slate-700">₹{formatNumber((result.market_cap || 0) * 10000000)}</p>
                   </div>
                 </CardContent>
               </Card>

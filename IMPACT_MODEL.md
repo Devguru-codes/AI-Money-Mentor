@@ -130,10 +130,10 @@ At average 12% XIRR over 10 years:
 ## 6. Consolidated Impact Summary
 
 ```mermaid
-pie title Annual Impact at 1M Users (₹ Crore)
-    "Time Savings (Tax + Portfolio)" : 472
+pie title Annual Impact at 1M Users in Crore Rupees
+    "Time Savings Tax and Portfolio" : 472
     "Tax Regime Optimization" : 592
-    "CA/CFP Fees Displaced" : 445
+    "CA and CFP Fees Displaced" : 445
     "XIRR-Driven Wealth Delta" : 1440
     "New SIP Inflows Catalyzed" : 630
 ```
@@ -154,7 +154,7 @@ pie title Annual Impact at 1M Users (₹ Crore)
 
 ```mermaid
 mindmap
-  root["🇮🇳 AI Money Mentor\nSocial Impact"]
+  root(AI Money Mentor Social Impact)
     Financial Literacy
       Tax education for first-time filers
       SIP and XIRR awareness
@@ -162,16 +162,16 @@ mindmap
     Democratization
       750M underserved Indians
       Zero marginal cost per query
-      24x7 availability in English
+      Available 24x7
     Gender Equality
-      Couple's Planner for joint decisions
-      Financial independence tools for women
+      Joint financial planning tools
+      Financial independence for women
     Economic Mobility
       Semi-urban and Tier-2 city access
-      No minimum investment requirement
+      No minimum investment required
     Regulatory Compliance
       SEBI-aware advice via Vidhi
-      Reduces tax evasion-by-ignorance
+      Reduces tax evasion by ignorance
 ```
 
 ---

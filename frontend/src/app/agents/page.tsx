@@ -1,11 +1,10 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Brain, BarChart3, Calculator, Target, TrendingUp, Shield, Scale, ArrowRight, Sparkles, Loader2, CalendarClock, Heart } from "lucide-react"
+import { Brain, BarChart3, Calculator, Target, TrendingUp, Shield, Scale, ArrowRight, Sparkles, CalendarClock, Heart } from "lucide-react"
 
 const agents = [
   {
@@ -75,7 +74,7 @@ const agents = [
     title: "Compliance",
     description: "Stay informed about SEBI regulations, disclaimers, and compliance requirements. Understand your rights and responsibilities as an investor.",
     features: ["SEBI Disclaimers", "Regulatory Guidelines", "Investor Rights", "Compliance Checklist"],
-    color: "from-gray-500 to-slate-600",
+    color: "from-slate-500 to-zinc-600",
     href: "/agents/vidhi",
     icon: Scale,
   },
@@ -102,12 +101,12 @@ const agents = [
 ]
 
 export default function AgentsPage() {
-  const [hoveredAgent, setHoveredAgent] = useState<string | null>(null)
-
   return (
     <div className="space-y-8">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold">AI Agent Hub</h1>
+      <div className="text-center space-y-3 animate-fade-in">
+        <h1 className="text-3xl md:text-4xl font-bold">
+          <span className="gradient-text">AI Agent Hub</span>
+        </h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
           Meet our team of specialized AI agents designed to help you with every aspect of your financial journey.
         </p>
@@ -117,16 +116,16 @@ export default function AgentsPage() {
       {agents.filter(a => a.featured).map((agent) => {
         const IconComponent = agent.icon
         return (
-          <Card key={agent.id} className="overflow-hidden border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50">
+          <Card key={agent.id} className="overflow-hidden border-2 border-purple-200 dark:border-purple-800/50 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/20 animate-slide-up animate-pulse-glow">
             <div className="p-6 md:p-8">
               <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-                <div className="p-4 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl">
+                <div className="p-4 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl shadow-lg animate-float">
                   {IconComponent && <IconComponent className="w-8 h-8 text-white" />}
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <h2 className="text-2xl font-bold">{agent.name}</h2>
-                    <Badge className="bg-purple-500">
+                    <Badge className="bg-gradient-to-r from-purple-500 to-indigo-600 border-0 text-white">
                       <Sparkles className="w-3 h-3 mr-1" />
                       Featured
                     </Badge>
@@ -135,11 +134,11 @@ export default function AgentsPage() {
                   <p className="text-muted-foreground mb-4">{agent.description}</p>
                   <div className="flex flex-wrap gap-2 mb-4">
                     {agent.features.map((feature, idx) => (
-                      <Badge key={idx} variant="secondary">{feature}</Badge>
+                      <Badge key={idx} variant="secondary" className="text-xs">{feature}</Badge>
                     ))}
                   </div>
                   <Link href={agent.href}>
-                    <Button size="lg" className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:opacity-90">
+                    <Button size="lg" className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
                       <Brain className="w-5 h-5 mr-2" />
                       Start Chatting
                       <ArrowRight className="w-4 h-4 ml-2" />
@@ -156,19 +155,17 @@ export default function AgentsPage() {
       <div>
         <h2 className="text-xl font-semibold mb-4">Specialist Agents</h2>
         <div className="grid md:grid-cols-2 gap-6">
-          {agents.filter(a => !a.featured).map((agent) => {
+          {agents.filter(a => !a.featured).map((agent, i) => {
             const IconComponent = agent.icon
             return (
               <Link key={agent.id} href={agent.href}>
-                <Card 
-                  className="h-full hover:shadow-lg transition-all duration-200 hover:border-primary cursor-pointer overflow-hidden group"
-                  onMouseEnter={() => setHoveredAgent(agent.id)}
-                  onMouseLeave={() => setHoveredAgent(null)}
+                <Card
+                  className={`h-full card-hover cursor-pointer overflow-hidden group border-border/60 dark:border-border/30 animate-slide-up stagger-${i + 1}`}
                 >
-                  <div className={"h-2 bg-gradient-to-r " + agent.color} />
+                  <div className={`h-1.5 bg-gradient-to-r ${agent.color} transition-all duration-300 group-hover:h-2`} />
                   <CardHeader>
                     <div className="flex items-center gap-3">
-                      <div className={"p-2 rounded-lg bg-gradient-to-br " + agent.color + " text-white"}>
+                      <div className={`p-2.5 rounded-xl bg-gradient-to-br ${agent.color} text-white shadow-md transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>
                         {IconComponent && <IconComponent className="w-5 h-5" />}
                       </div>
                       <div>
@@ -184,7 +181,7 @@ export default function AgentsPage() {
                         <Badge key={idx} variant="secondary" className="text-xs">{feature}</Badge>
                       ))}
                     </div>
-                    <div className="pt-2 flex items-center text-primary text-sm font-medium group-hover:translate-x-1 transition-transform">
+                    <div className="pt-2 flex items-center text-primary text-sm font-medium group-hover:translate-x-2 transition-transform duration-300">
                       Try Now <ArrowRight className="w-4 h-4 ml-1" />
                     </div>
                   </CardContent>

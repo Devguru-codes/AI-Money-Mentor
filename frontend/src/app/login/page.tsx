@@ -76,15 +76,22 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
-            <span className="text-2xl">💰</span>
-          </div>
-          <CardTitle className="text-2xl">AI Money Mentor</CardTitle>
-          <CardDescription>Your personal finance guide</CardDescription>
-        </CardHeader>
+    <div className="min-h-[80vh] flex items-center justify-center animate-fade-in">
+      <div className="relative w-full max-w-md">
+        {/* Decorative orbs */}
+        <div className="absolute -top-20 -left-20 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl" />
+        
+        <Card className="w-full relative border-border/60 dark:border-border/30 shadow-2xl">
+          <CardHeader className="text-center pb-4">
+            <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg animate-float">
+              <span className="text-3xl">💰</span>
+            </div>
+            <CardTitle className="text-2xl">
+              <span className="gradient-text">AI Money Mentor</span>
+            </CardTitle>
+            <CardDescription>Your personal finance guide</CardDescription>
+          </CardHeader>
         <CardContent className="space-y-4">
           {/* Auth Mode Toggle */}
           <div className="flex bg-muted rounded-lg p-1">
@@ -158,7 +165,7 @@ export default function LoginPage() {
               </>
             )}
 
-            <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90" disabled={loading}>
+            <Button type="submit" className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -179,6 +186,7 @@ export default function LoginPage() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   )
 }

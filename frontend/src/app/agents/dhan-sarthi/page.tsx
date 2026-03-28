@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, Send, Brain } from "lucide-react"
+import { Loader2, Send, Brain, Calculator, Target, TrendingUp, Shield, Scale, Heart, CalendarClock, BarChart3, Sparkles } from "lucide-react"
 import { parseMarkdown } from "@/lib/markdown"
 
 interface Message {
@@ -17,25 +17,44 @@ interface Message {
 }
 
 const agentNames: Record<string, string> = {
-  niveshak: "Niveshak",
-  karvid: "KarVid",
-  yojana: "YojanaKarta",
-  bazaar: "BazaarGuru",
-  dhan: "DhanRaksha",
-  vidhi: "Vidhi",
-  "life-event": "Life Event Advisor",
-  "couple-planner": "Couple's Planner",
-  "dhan-sarthi": "DhanSarthi",
+  niveshak: "📊 Niveshak",
+  karvid: "🧾 KarVid",
+  yojana: "🎯 YojanaKarta",
+  bazaar: "📈 BazaarGuru",
+  dhan: "💪 DhanRaksha",
+  vidhi: "⚖️ Vidhi",
+  "life-event": "🎉 Life Event",
+  "couple-planner": "💑 Couple's Planner",
+  "dhan-sarthi": "🧠 DhanSarthi",
 }
 
-// Global parser is imported
+const agentColorMap: Record<string, string> = {
+  niveshak: "from-blue-500/25 to-blue-600/15 border-blue-500/30",
+  karvid: "from-green-500/25 to-green-600/15 border-green-500/30",
+  yojana: "from-orange-500/25 to-orange-600/15 border-orange-500/30",
+  bazaar: "from-pink-500/25 to-pink-600/15 border-pink-500/30",
+  dhan: "from-red-500/25 to-red-600/15 border-red-500/30",
+  vidhi: "from-slate-400/25 to-slate-500/15 border-slate-400/30",
+  "life-event": "from-teal-500/25 to-teal-600/15 border-teal-500/30",
+  "couple-planner": "from-rose-400/25 to-rose-500/15 border-rose-400/30",
+  "dhan-sarthi": "from-purple-500/25 to-indigo-600/15 border-purple-500/30",
+}
+
+const quickPrompts = [
+  { label: "Calculate my tax", icon: Calculator, color: "text-green-400 border-green-500/30 hover:bg-green-500/10" },
+  { label: "FIRE planning", icon: Target, color: "text-orange-400 border-orange-500/30 hover:bg-orange-500/10" },
+  { label: "Stock analysis", icon: TrendingUp, color: "text-pink-400 border-pink-500/30 hover:bg-pink-500/10" },
+  { label: "Health score", icon: Shield, color: "text-red-400 border-red-500/30 hover:bg-red-500/10" },
+  { label: "MF portfolio", icon: BarChart3, color: "text-blue-400 border-blue-500/30 hover:bg-blue-500/10" },
+  { label: "SEBI rules", icon: Scale, color: "text-slate-300 border-slate-500/30 hover:bg-slate-500/10" },
+]
 
 export default function DhanSarthiPage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
       role: "assistant",
-      content: "Hello! I am DhanSarthi, your AI financial coordinator powered by real AI.\n\nI can help you with:\n• Tax calculations - \"Calculate tax for 15 lakhs\"\n• FIRE planning - \"What is FIRE?\" or \"My expenses are 50K\"\n• Stock prices - \"RELIANCE stock price\"\n• Financial health - \"What is my health score?\"\n• Legal/Compliance - \"What are SEBI regulations?\"\n• Life Events - \"Plan for my wedding\"\n• Couple Finance - \"Joint budget with my partner\"\n\nWhat would you like to know?",
+      content: "Hello! I am **DhanSarthi**, your AI financial coordinator.\n\nI can help you with:\n• 🧾 **Tax calculations** — \"Calculate tax for 15 lakhs\"\n• 🎯 **FIRE planning** — \"What is FIRE?\" or \"My expenses are 50K\"\n• 📈 **Stock prices** — \"RELIANCE stock price\"\n• 💪 **Financial health** — \"What is my health score?\"\n• ⚖️ **Legal/Compliance** — \"What are SEBI regulations?\"\n• 🎉 **Life Events** — \"Plan for my wedding\"\n• 💑 **Couple Finance** — \"Joint budget with my partner\"\n\nWhat would you like to know?",
       agent: "dhan-sarthi",
       timestamp: new Date(),
     },
@@ -101,7 +120,6 @@ export default function DhanSarthiPage() {
     loadHistory()
   }, [])
 
-  // Helper to save chat to DB
   const saveChat = useCallback(async (query: string, response: string, agentType: string) => {
     try {
       const storedUser = localStorage.getItem('user')
@@ -118,7 +136,6 @@ export default function DhanSarthiPage() {
     }
   }, [])
 
-  // Get user ID from localStorage
   const getUserId = (): string => {
     try {
       const storedUser = localStorage.getItem('user')
@@ -140,7 +157,6 @@ export default function DhanSarthiPage() {
       timestamp: new Date(),
     }])
     
-    // Split efficiently: keep spaces on words so we can stitch 
     const words = fullText.match(/(\S+\s+)|(\S+)/g) || [fullText]
     let currentText = ""
     
@@ -149,28 +165,27 @@ export default function DhanSarthiPage() {
         setMessages((prev) => prev.map(m => 
             m.id === newMessageId ? { ...m, content: currentText } : m
         ))
-        // Small delay to simulate streaming UX (20ms)
         await new Promise(r => setTimeout(r, 20))
     }
   }
 
-  const handleSend = async () => {
-    if (!input.trim() || loading) return
+  const handleSend = async (customMessage?: string) => {
+    const messageText = customMessage || input.trim()
+    if (!messageText || loading) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: input,
+      content: messageText,
       timestamp: new Date(),
     }
     setMessages((prev) => [...prev, userMessage])
     
-    const query = input.trim()
-    setInput("")
+    const query = messageText
+    if (!customMessage) setInput("")
     setLoading(true)
 
     try {
-      // Send to the real OpenClaw bridge
       const response = await fetch("/api/bridge/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -185,7 +200,6 @@ export default function DhanSarthiPage() {
       if (response.ok) {
         const data = await response.json()
         
-        // Store session_id for conversation continuity
         if (data.session_id) {
           setSessionId(data.session_id)
         }
@@ -194,11 +208,8 @@ export default function DhanSarthiPage() {
         const agentId = data.agent || "dhan-sarthi"
 
         await simulateStreaming(aiResponse, agentId)
-
-
         saveChat(query, aiResponse, agentId)
       } else {
-        // Fallback: try the old dhan-sarthi route endpoint
         const fallbackResponse = await fetch("/api/dhan-sarthi", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -235,70 +246,127 @@ export default function DhanSarthiPage() {
     }
   }
 
+  const showQuickPrompts = messages.length <= 1
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <header className="border-b border-white/10 p-4">
-        <div className="container mx-auto flex items-center justify-between">
-          <a href="/" className="flex items-center gap-2 text-white hover:text-purple-300">
-            <span>← Back to Home</span>
-          </a>
-          <div className="flex items-center gap-2">
-            <Brain className="w-6 h-6 text-purple-400" />
-            <span className="text-white font-bold">DhanSarthi</span>
-            <Badge className="ml-1 bg-emerald-500/20 text-emerald-400 text-xs">AI Powered</Badge>
-            <Badge className={`ml-1 ${backendStatus === 'online' ? 'bg-green-500/20 text-green-400' : backendStatus === 'offline' ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
-              {backendStatus === 'online' ? 'Online' : backendStatus === 'offline' ? 'Offline' : 'Checking...'}
-            </Badge>
+    <div className="max-w-5xl mx-auto animate-fade-in">
+      {/* Page Header */}
+      <div className="mb-5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="p-3 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl shadow-lg">
+              <Brain className="w-7 h-7 text-white" />
+            </div>
+            <span className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-background ${backendStatus === 'online' ? 'bg-emerald-500' : backendStatus === 'offline' ? 'bg-red-500' : 'bg-yellow-500 animate-pulse'}`} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              DhanSarthi
+              <Badge className="bg-gradient-to-r from-purple-500 to-indigo-600 border-0 text-white text-xs shadow-sm">
+                <Sparkles className="w-3 h-3 mr-1" />
+                AI Coordinator
+              </Badge>
+            </h1>
+            <p className="text-sm text-muted-foreground">Your unified financial AI — routes to 9 specialist agents</p>
           </div>
         </div>
-      </header>
-
-      <div className="container mx-auto max-w-4xl h-[calc(100vh-8rem)] flex flex-col">
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((msg) => (
-            <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[80%] rounded-xl p-4 ${msg.role === 'user' ? 'bg-purple-600 text-white' : 'bg-white/10 text-white'}`}>
-                {msg.agent && msg.role === 'assistant' && (
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge className="bg-purple-500/30 text-purple-300">
-                      {agentNames[msg.agent] || msg.agent}
-                    </Badge>
-                  </div>
-                )}
-                <div className="whitespace-pre-wrap">{parseMarkdown(msg.content)}</div>
-              </div>
-            </div>
-          ))}
-          {loading && (
-            <div className="flex justify-start">
-              <div className="bg-white/10 rounded-xl p-4 text-white flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>DhanSarthi is thinking...</span>
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-
-        <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="p-4 border-t border-white/10">
-          <div className="flex gap-2">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask anything about finance — taxes, FIRE, stocks, legal, couples..."
-              className="flex-1 bg-white/10 text-white rounded-xl px-4 py-3 placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 border-white/20"
-              disabled={loading}
-            />
-            <Button 
-              type="submit" 
-              disabled={loading || !input.trim()}
-              className="bg-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-700 disabled:opacity-50"
-            >
-              <Send className="w-5 h-5" />
-            </Button>
-          </div>
-        </form>
       </div>
+
+      {/* Main Chat Container */}
+      <Card className="overflow-hidden border-border/60 dark:border-border/30 shadow-2xl">
+        <div className="bg-gradient-to-br from-slate-900 via-[#1a1040] to-slate-900 rounded-lg relative overflow-hidden">
+          {/* Subtle background pattern */}
+          <div className="absolute inset-0 opacity-[0.03]" style={{backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '32px 32px'}} />
+          
+          <div className="h-[calc(100vh-14rem)] flex flex-col relative z-10">
+            {/* Messages Area */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+              {messages.map((msg) => (
+                <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  {msg.role === 'assistant' && (
+                    <div className="flex-shrink-0 mr-3 mt-1">
+                      <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${agentColorMap[msg.agent || 'dhan-sarthi'] || agentColorMap['dhan-sarthi']} flex items-center justify-center text-xs border`}>
+                        {msg.agent === 'dhan-sarthi' ? '🧠' : msg.agent === 'karvid' ? '🧾' : msg.agent === 'yojana' ? '🎯' : msg.agent === 'bazaar' ? '📈' : msg.agent === 'niveshak' ? '📊' : msg.agent === 'dhan' ? '💪' : msg.agent === 'vidhi' ? '⚖️' : msg.agent === 'life-event' ? '🎉' : msg.agent === 'couple-planner' ? '💑' : '🤖'}
+                      </div>
+                    </div>
+                  )}
+                  <div className={`max-w-[75%] rounded-2xl p-4 ${
+                    msg.role === 'user' 
+                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/20' 
+                      : `bg-gradient-to-br ${agentColorMap[msg.agent || 'dhan-sarthi'] || agentColorMap['dhan-sarthi']} text-white backdrop-blur-sm border`
+                  }`}>
+                    {msg.agent && msg.role === 'assistant' && (
+                      <div className="flex items-center gap-2 mb-2 pb-2 border-b border-white/10">
+                        <span className="text-xs font-semibold text-white/80">
+                          {agentNames[msg.agent] || msg.agent}
+                        </span>
+                      </div>
+                    )}
+                    <div className="whitespace-pre-wrap text-sm leading-relaxed">{parseMarkdown(msg.content)}</div>
+                  </div>
+                </div>
+              ))}
+
+              {loading && (
+                <div className="flex justify-start">
+                  <div className="flex-shrink-0 mr-3 mt-1">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500/25 to-indigo-600/15 border border-purple-500/30 flex items-center justify-center text-xs">🧠</div>
+                  </div>
+                  <div className="bg-gradient-to-br from-purple-500/20 to-indigo-600/10 border border-purple-500/25 backdrop-blur-sm rounded-2xl p-4 text-white flex items-center gap-3">
+                    <div className="flex gap-1.5">
+                      <span className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                    </div>
+                    <span className="text-sm text-purple-200/80">DhanSarthi is routing your query...</span>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Quick Action Chips — only show at start */}
+            {showQuickPrompts && (
+              <div className="px-5 pb-3">
+                <p className="text-xs text-white/40 mb-2 font-medium">Quick actions</p>
+                <div className="flex flex-wrap gap-2">
+                  {quickPrompts.map((prompt) => (
+                    <button
+                      key={prompt.label}
+                      onClick={() => handleSend(prompt.label)}
+                      disabled={loading}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 disabled:opacity-50 ${prompt.color}`}
+                    >
+                      <prompt.icon className="w-3 h-3" />
+                      {prompt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Input Area */}
+            <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="p-4 border-t border-white/8 bg-black/30 backdrop-blur-sm">
+              <div className="flex gap-3">
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Ask anything about finance — taxes, FIRE, stocks, legal, couples..."
+                  className="flex-1 bg-white/8 text-white rounded-xl px-4 py-3 placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500/50 border-white/10 hover:border-white/20 transition-colors"
+                  disabled={loading}
+                />
+                <Button 
+                  type="submit" 
+                  disabled={loading || !input.trim()}
+                  className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white px-5 py-3 rounded-xl shadow-lg shadow-purple-500/20 transition-all duration-300 disabled:opacity-40 disabled:shadow-none"
+                >
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </Card>
     </div>
   )
 }

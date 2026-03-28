@@ -249,7 +249,7 @@ export default function DhanSarthiPage() {
   const showQuickPrompts = messages.length <= 1
 
   return (
-    <div className="max-w-5xl mx-auto animate-fade-in">
+    <div className="max-w-7xl mx-auto animate-fade-in">
       {/* Page Header */}
       <div className="mb-5 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -290,7 +290,7 @@ export default function DhanSarthiPage() {
                       </div>
                     </div>
                   )}
-                  <div className={`max-w-[75%] rounded-2xl p-4 ${
+                  <div className={`max-w-[85%] rounded-2xl p-4 ${
                     msg.role === 'user' 
                       ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/20' 
                       : `bg-gradient-to-br ${agentColorMap[msg.agent || 'dhan-sarthi'] || agentColorMap['dhan-sarthi']} text-white backdrop-blur-sm border`
@@ -302,7 +302,7 @@ export default function DhanSarthiPage() {
                         </span>
                       </div>
                     )}
-                    <div className="whitespace-pre-wrap text-sm leading-relaxed">{parseMarkdown(msg.content)}</div>
+                    <div className="text-sm leading-relaxed">{parseMarkdown(msg.content)}</div>
                   </div>
                 </div>
               ))}

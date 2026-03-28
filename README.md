@@ -297,17 +297,25 @@ The project runs on an AWS EC2 instance:
 # SSH into the instance
 ssh -i your-key.pem ubuntu@your-ip
 
+# Pull latest code
+cd ~/ai-money-mentor
+git pull origin main
+
 # Start backend
-cd ~/ai-money-mentor-unified/backend
+cd backend
 source venv/bin/activate
 nohup uvicorn api_server:app --host 0.0.0.0 --port 8000 &
 
-# Start frontend
-cd ~/ai-money-mentor-unified/frontend
-nohup npm run dev -- -H 0.0.0.0 &
+# Build & start frontend (production)
+cd ../frontend
+npm run build
+npm run start -- -p 3000 &
+
+# Or use PM2 (recommended — auto-restart on crash):
+pm2 restart all
 ```
 
-> **Note:** Ensure ports **3000** and **8000** are open in your AWS Security Group for public access.
+> **Note:** Ensure ports **3000** and **8000** are open in your AWS Security Group. The production instance uses PM2 for process management with 3 services: `frontend`, `backend`, and `openclaw-node`.
 
 ---
 

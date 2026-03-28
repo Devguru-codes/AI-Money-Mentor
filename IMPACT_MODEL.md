@@ -198,18 +198,25 @@ mindmap
 
 | Tier | Price | Value Prop | Estimated Adoption |
 |---|---|---|---|
-| Free | ₹0 | All 9 agents, basic usage | 85% of users |
+| Free (Ad-Supported) | ₹0 | All 9 agents, basic usage, contextual financial ads (Google AdSense) | 85% of users |
 | Pro | ₹299/month | Unlimited queries, portfolio history, PDF reports | 12% of users |
 | Advisor API | ₹5,000/month | White-label API for CA firms and wealth apps | 3% (institutions) |
 
 ```
 Revenue at 1M users:
-Free tier:    850,000 × ₹0      = ₹0
-Pro tier:     120,000 × ₹299/mo = ₹35.88 Cr/year
-Advisor API:  30,000  × ₹5k/mo  = ₹180 Cr/year
+Free tier (Ads):  850,000 users × 3 ad impressions/session × 20 sessions/month
+                  = 51M impressions/month
+                  × ₹15 CPM (Google AdSense, finance niche)
+                  = ₹9.18 Cr/year
+                  + Affiliate commissions (MF/insurance signups via ads)
+                  = ~₹13.77 Cr/year
+Pro tier:         120,000 × ₹299/mo = ₹35.88 Cr/year
+Advisor API:      30,000  × ₹5k/mo  = ₹180 Cr/year
 
-TOTAL ARR at 1M users: ~₹216 Cr/year (~$26M USD)
+TOTAL ARR at 1M users: ~₹230 Cr/year (~$28M USD)
 ```
+
+> **Ad Strategy for Free Tier:** Contextual, non-intrusive financial ads (mutual fund promotions, insurance plans, tax filing services) via Google AdSense. Finance niche commands premium CPM rates (₹12–₹20). Ads placed in non-chat areas — sidebar banners, post-calculation recommendation cards, and footer leaderboards. No ads inside the DhanSarthi chat interface to preserve UX quality.
 
 ---
 

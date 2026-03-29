@@ -153,8 +153,8 @@ export default function VidhiPage() {
         </div>
 
         <div>
-          <Card className="h-full flex flex-col border-purple-200/50 overflow-hidden">
-            <CardHeader className="bg-purple-50/50 dark:bg-purple-900/20 border-b">
+          <Card className="h-full flex flex-col border-purple-200/50 overflow-hidden pt-0">
+            <CardHeader className="bg-purple-50/50 dark:bg-purple-900/20 border-b pt-4">
               <CardTitle className="flex justify-between items-center">
                 <span>Ask Vidhi</span>
                 <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">AI Active</Badge>

@@ -159,8 +159,8 @@ export default function CouplePlannerPage() {
 
         {/* AI Chat Sidebar */}
         <div>
-          <Card className="h-full flex flex-col border-purple-200/50 min-h-[600px] overflow-hidden">
-            <CardHeader className="bg-purple-50/50 dark:bg-purple-900/20 border-b">
+          <Card className="h-full flex flex-col border-purple-200/50 min-h-[600px] overflow-hidden pt-0">
+            <CardHeader className="bg-purple-50/50 dark:bg-purple-900/20 border-b pt-4">
               <CardTitle>Plan Discussion</CardTitle>
               <CardDescription>Chat directly with the Joint Planning AI</CardDescription>
             </CardHeader>

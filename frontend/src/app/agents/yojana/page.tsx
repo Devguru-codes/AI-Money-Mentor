@@ -278,8 +278,8 @@ export default function YojanaPage() {
 
         {/* AI Chat Sidebar */}
         <div className="lg:sticky lg:top-6">
-          <Card className="h-full flex flex-col border-orange-200/50 min-h-[600px] shadow-lg overflow-hidden">
-            <CardHeader className="bg-orange-50/50 dark:bg-orange-900/20 border-b">
+          <Card className="h-full flex flex-col border-orange-200/50 min-h-[600px] shadow-lg overflow-hidden pt-0">
+            <CardHeader className="bg-orange-50/50 dark:bg-orange-900/20 border-b pt-4">
               <CardTitle>Yojana Consult</CardTitle>
               <CardDescription>Chat directly with your FIRE advisor</CardDescription>
             </CardHeader>

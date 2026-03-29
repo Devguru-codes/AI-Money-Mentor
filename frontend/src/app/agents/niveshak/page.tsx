@@ -268,34 +268,34 @@ export default function NiveshakPage() {
           {result && (
             <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
               <div className="grid grid-cols-3 gap-4">
-                <Card className="bg-blue-50/50 border-blue-100">
+                <Card className="bg-blue-50/50 border-blue-100 dark:bg-blue-950/30 dark:border-blue-900">
                   <CardContent className="p-4">
                     <p className="text-xs text-muted-foreground font-medium mb-1">Total Value</p>
-                    <p className="text-2xl font-bold">{formatCurrency(result.totalValue)}</p>
+                    <p className="text-2xl font-bold dark:text-blue-100">{formatCurrency(result.totalValue)}</p>
                   </CardContent>
                 </Card>
-                <Card className="bg-green-50/50 border-green-100">
+                <Card className="bg-green-50/50 border-green-100 dark:bg-green-950/30 dark:border-green-900">
                   <CardContent className="p-4">
                     <p className="text-xs text-muted-foreground font-medium mb-1">Calculated XIRR</p>
-                    <p className="text-2xl font-bold text-green-700">{result.xirr.toFixed(2)}%</p>
+                    <p className="text-2xl font-bold text-green-700 dark:text-green-400">{result.xirr.toFixed(2)}%</p>
                   </CardContent>
                 </Card>
-                <Card className="bg-indigo-50/50 border-indigo-100">
+                <Card className="bg-indigo-50/50 border-indigo-100 dark:bg-indigo-950/30 dark:border-indigo-900">
                   <CardContent className="p-4">
                     <p className="text-xs text-muted-foreground font-medium mb-1">Sharpe Ratio</p>
-                    <p className="text-2xl font-bold text-indigo-700">{result.sharpeRatio.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-indigo-700 dark:text-indigo-400">{result.sharpeRatio.toFixed(2)}</p>
                   </CardContent>
                 </Card>
               </div>
             </div>
           )}
 
-          <Card className="border-yellow-200 bg-yellow-50">
+          <Card className="border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20 dark:border-yellow-900/50">
             <CardHeader className="py-3">
-              <CardTitle className="text-sm text-yellow-800">⚠️ SEBI Disclaimer</CardTitle>
+              <CardTitle className="text-sm text-yellow-800 dark:text-yellow-500">⚠️ SEBI Disclaimer</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-xs leading-relaxed text-yellow-700">
+              <p className="text-xs leading-relaxed text-yellow-700 dark:text-yellow-600/90">
                 Mutual fund investments are subject to market risks. Read all scheme-related documents carefully. 
                 Past performance is not indicative of future results. This is for educational purposes only and 
                 should not be construed as financial advice.

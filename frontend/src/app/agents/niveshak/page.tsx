@@ -306,8 +306,8 @@ export default function NiveshakPage() {
 
         {/* AI Chat Sidebar */}
         <div className="lg:sticky lg:top-6">
-          <Card className="h-full flex flex-col border-blue-200/50 min-h-[600px] shadow-lg">
-            <CardHeader className="bg-blue-50/50 border-b">
+          <Card className="h-full flex flex-col border-blue-200/50 min-h-[600px] shadow-lg overflow-hidden">
+            <CardHeader className="bg-blue-50/50 dark:bg-blue-900/20 border-b">
               <CardTitle>Niveshak AI Consult</CardTitle>
               <CardDescription>Chat directly with your portfolio analyzer</CardDescription>
             </CardHeader>

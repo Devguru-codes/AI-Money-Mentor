@@ -302,8 +302,8 @@ export default function DhanPage() {
 
         {/* AI Chat Sidebar */}
         <div className="lg:sticky lg:top-6">
-          <Card className="h-full flex flex-col border-red-200/50 min-h-[600px] shadow-lg">
-            <CardHeader className="bg-red-50/50 border-b">
+          <Card className="h-full flex flex-col border-red-200/50 min-h-[600px] shadow-lg overflow-hidden">
+            <CardHeader className="bg-red-50/50 dark:bg-red-900/20 border-b">
               <CardTitle>DhanRaksha Consult</CardTitle>
               <CardDescription>Chat directly with your diagnostic advisor</CardDescription>
             </CardHeader>

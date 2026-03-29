@@ -239,8 +239,8 @@ export default function BazaarPage() {
 
         {/* AI Chat Sidebar */}
         <div className="lg:sticky lg:top-6">
-          <Card className="h-full flex flex-col border-pink-200/50 min-h-[600px] shadow-lg">
-            <CardHeader className="bg-pink-50/50 border-b">
+          <Card className="h-full flex flex-col border-pink-200/50 min-h-[600px] shadow-lg overflow-hidden">
+            <CardHeader className="bg-pink-50/50 dark:bg-pink-900/20 border-b">
               <CardTitle>Bazaar Consult</CardTitle>
               <CardDescription>Chat directly with your fundamental analyst</CardDescription>
             </CardHeader>

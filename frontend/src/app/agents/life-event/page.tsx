@@ -185,8 +185,8 @@ export default function LifeEventPage() {
 
         {/* AI Chat Sidebar */}
         <div>
-          <Card className="h-full flex flex-col border-purple-200/50 min-h-[500px]">
-            <CardHeader className="bg-purple-50/50 border-b">
+          <Card className="h-full flex flex-col border-purple-200/50 min-h-[500px] overflow-hidden">
+            <CardHeader className="bg-purple-50/50 dark:bg-purple-900/20 border-b">
               <CardTitle>AI Goal Discussion</CardTitle>
               <CardDescription>Chat directly with your Life Event AI</CardDescription>
             </CardHeader>

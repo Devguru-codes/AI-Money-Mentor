@@ -291,8 +291,8 @@ export default function KarVidPage() {
 
         {/* AI Chat Sidebar */}
         <div className="lg:sticky lg:top-6">
-          <Card className="h-full flex flex-col border-green-200/50 min-h-[600px] shadow-lg">
-            <CardHeader className="bg-green-50/50 border-b">
+          <Card className="h-full flex flex-col border-green-200/50 min-h-[600px] shadow-lg overflow-hidden">
+            <CardHeader className="bg-green-50/50 dark:bg-green-900/20 border-b">
               <CardTitle>KarVid Consult</CardTitle>
               <CardDescription>Chat directly with the Indian Tax Agent</CardDescription>
             </CardHeader>

@@ -33,15 +33,22 @@
 ## 🎬 SCENE 3 — DhanSarthi: AI Coordinator [Agent 1] (0:25 – 0:50)
 
 ### 🎤 Speaking Script
-> "DhanSarthi is the brain. Ask any financial question in plain English — it automatically routes to the right specialist."
+> "DhanSarthi is the brain of the platform. One question can span taxes, retirement, and investments — and it automatically routes to the right specialist agents. Watch this."
 
 ### 🖥️ Action
 1. Click **Start Chatting** on DhanSarthi card
-2. **Type:** `Calculate tax for income of 15 lakhs`
-3. Wait for response — it routes to KarVid and shows tax breakdown
+2. Type this single multi-domain prompt:
 
-### 🎤 Speaking Script (continued)
-> "I asked about taxes — it instantly routed to KarVid, our tax specialist, and gave me both regime calculations."
+| Field | Value |
+|-------|-------|
+| **Chat input** | `I earn 15 lakhs per year, I want to retire at 45, and I'm investing in Reliance stock. Can you help me with tax saving, my FIRE plan, and whether Reliance is a good pick?` |
+
+3. Press Enter / click Send
+4. Wait for response — DhanSarthi coordinates across **KarVid** (tax), **YojanaKarta** (FIRE) and **BazaarGuru** (stock) to give a unified answer
+
+### 🎤 Speaking Script (after response)
+> "One question — three specialist agents activated. Tax advice from KarVid, retirement math from YojanaKarta, and stock insights from BazaarGuru. That's our multi-agent architecture in action. No other platform does this. Now let me show you each agent's dedicated workspace."
+
 
 ---
 
@@ -265,10 +272,11 @@
 
 ## 📋 Complete Input Cheat Sheet
 
-### Agent 1: DhanSarthi (Chat Only)
+### Agent 1: DhanSarthi (Single Multi-Agent Prompt)
 ```
-Type: Calculate tax for income of 15 lakhs
+I earn 15 lakhs per year, I want to retire at 45, and I'm investing in Reliance stock. Can you help me with tax saving, my FIRE plan, and whether Reliance is a good pick?
 ```
+> This one prompt triggers KarVid (tax), YojanaKarta (FIRE), and BazaarGuru (stock) simultaneously.
 
 ### Agent 2: KarVid (Form)
 ```

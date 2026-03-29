@@ -83,8 +83,15 @@ export default function LoginPage() {
       const user = data.user
       localStorage.setItem("user", JSON.stringify(user))
       localStorage.setItem("isLoggedIn", "true")
+
+      // Clear any old dashboard data for the new session
+      localStorage.removeItem("dashboard_portfolio")
+      localStorage.removeItem("dashboard_tax_saved")
+      localStorage.removeItem("dashboard_fire")
+      localStorage.removeItem("dashboard_health")
+
       toast.success(authMode === "login" ? "Welcome back!" : "Account created successfully!")
-      setTimeout(() => router.push("/"), 500)
+      setTimeout(() => window.location.href = "/", 500)
     } catch (error) {
       toast.error("Authentication failed. Please try again.")
     } finally {

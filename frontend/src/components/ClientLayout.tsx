@@ -45,6 +45,12 @@ export default function ClientLayout({
   const handleLogout = () => {
     localStorage.removeItem("user")
     localStorage.removeItem("isLoggedIn")
+    // Clear dashboard statistics on logout
+    localStorage.removeItem("dashboard_portfolio")
+    localStorage.removeItem("dashboard_tax_saved")
+    localStorage.removeItem("dashboard_fire")
+    localStorage.removeItem("dashboard_health")
+
     setUser(null)
     setIsLoggedIn(false)
     toast.success("Logged out successfully")

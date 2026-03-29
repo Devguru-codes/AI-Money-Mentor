@@ -202,8 +202,8 @@ export default function LifeEventPage() {
                 {chatLoading && (
                   <div className="flex justify-start">
                     <div className="bg-muted rounded-xl p-3 flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span className="text-sm">Analyzing timeline and shortfall...</span>
+                      <Loader2 className="w-4 h-4 animate-spin text-purple-600 dark:text-purple-400" />
+                      <span className="text-sm text-muted-foreground dark:text-gray-300">Analyzing timeline and shortfall...</span>
                     </div>
                   </div>
                 )}

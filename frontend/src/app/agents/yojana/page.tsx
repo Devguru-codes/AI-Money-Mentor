@@ -222,7 +222,7 @@ export default function YojanaPage() {
                   <Input type="number" value={formData.inflation} onChange={(e) => handleChange("inflation", e.target.value)} />
                 </div>
               </div>
-              <Button onClick={calculateFIRE} disabled={calculating} className="w-full bg-orange-600 hover:bg-orange-700">
+              <Button onClick={calculateFIRE} disabled={calculating} className="w-full bg-orange-600 hover:bg-orange-700 text-white">
                 {calculating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Calculating...</> : <><Calculator className="w-4 h-4 mr-2" /> Calculate FIRE Number</>}
               </Button>
             </CardContent>
@@ -231,22 +231,22 @@ export default function YojanaPage() {
           {result && (
             <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
               <div className="grid md:grid-cols-3 gap-4">
-                <Card className="bg-orange-50/50 border-orange-200">
+                <Card className="bg-orange-50/50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800">
                   <CardContent className="p-4">
                     <p className="text-xs text-muted-foreground font-medium mb-1">Base Target (4% Rule)</p>
-                    <p className="text-2xl font-bold text-orange-700">₹{formatRupees(result.fireNumber)}</p>
+                    <p className="text-2xl font-bold text-orange-700 dark:text-orange-400">₹{formatRupees(result.fireNumber)}</p>
                   </CardContent>
                 </Card>
-                <Card className="bg-amber-50/50 border-amber-200">
+                <Card className="bg-amber-50/50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
                   <CardContent className="p-4">
                     <p className="text-xs text-muted-foreground font-medium mb-1">Target At Retirement</p>
-                    <p className="text-2xl font-bold text-amber-700">₹{formatRupees(result.inflationAdjusted)}</p>
+                    <p className="text-2xl font-bold text-amber-700 dark:text-amber-400">₹{formatRupees(result.inflationAdjusted)}</p>
                   </CardContent>
                 </Card>
-                <Card className="bg-yellow-50/50 border-yellow-200">
+                <Card className="bg-yellow-50/50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
                   <CardContent className="p-4">
                     <p className="text-xs text-muted-foreground font-medium mb-1">Required Monthly SIP</p>
-                    <p className="text-2xl font-bold text-yellow-700">{formatCurrency(result.monthlySIP)}</p>
+                    <p className="text-2xl font-bold text-yellow-700 dark:text-yellow-400">{formatCurrency(result.monthlySIP)}</p>
                   </CardContent>
                 </Card>
               </div>

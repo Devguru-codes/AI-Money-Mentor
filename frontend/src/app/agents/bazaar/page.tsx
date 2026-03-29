@@ -169,7 +169,7 @@ export default function BazaarPage() {
                   />
                 </div>
                 <div className="flex items-end">
-                  <Button onClick={() => searchStock()} disabled={loading || !symbol.trim()} className="bg-pink-600 hover:bg-pink-700 w-[120px]">
+                  <Button onClick={() => searchStock()} disabled={loading || !symbol.trim()} className="bg-pink-600 hover:bg-pink-700 w-[120px] text-white">
                     {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Get Quote"}
                   </Button>
                 </div>
@@ -192,8 +192,8 @@ export default function BazaarPage() {
 
           {result && (
             <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-              <Card className="border-pink-200/50 shadow-md">
-                <CardHeader className="bg-gradient-to-r from-pink-50/50 to-rose-50/50 border-b">
+              <Card className="border-pink-200/50 shadow-md overflow-hidden pt-0">
+                <CardHeader className="bg-gradient-to-r from-pink-50/50 to-rose-50/50 dark:from-pink-900/20 dark:to-rose-900/20 border-b pt-4">
                   <div className="flex justify-between items-start">
                     <div>
                       <CardTitle className="text-xl">{result.name}</CardTitle>
@@ -227,9 +227,9 @@ export default function BazaarPage() {
                     </div>
                   </div>
                   
-                  <div className="mt-4 p-4 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border">
+                  <div className="mt-4 p-4 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-xl border">
                     <p className="text-xs text-muted-foreground font-medium mb-1">Market Capitalization</p>
-                    <p className="text-3xl font-bold text-slate-700">₹{formatNumber((result.market_cap || 0) * 10000000)}</p>
+                    <p className="text-3xl font-bold text-slate-700 dark:text-slate-200">₹{formatNumber((result.market_cap || 0) * 10000000)}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -256,8 +256,8 @@ export default function BazaarPage() {
                 {chatLoading && (
                   <div className="flex justify-start">
                     <div className="bg-muted rounded-xl p-3 flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                      <span className="text-sm text-muted-foreground">BazaarGuru is reviewing market conditions...</span>
+                      <Loader2 className="w-4 h-4 animate-spin text-pink-600 dark:text-pink-400" />
+                      <span className="text-sm text-muted-foreground dark:text-gray-300">BazaarGuru is reviewing market conditions...</span>
                     </div>
                   </div>
                 )}

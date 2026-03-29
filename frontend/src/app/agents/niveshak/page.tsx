@@ -255,7 +255,7 @@ export default function NiveshakPage() {
                 <Plus className="w-4 h-4 mr-2" /> Add Fund
               </Button>
               
-              <Button onClick={handleAnalyze} disabled={analyzing} className="w-full bg-blue-600 hover:bg-blue-700 h-11 text-base mt-4">
+              <Button onClick={handleAnalyze} disabled={analyzing} className="w-full bg-blue-600 hover:bg-blue-700 h-11 text-base mt-4 text-white">
                 {analyzing ? (
                   <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Analyzing Portfolio...</>
                 ) : (
@@ -323,8 +323,8 @@ export default function NiveshakPage() {
                 {chatLoading && (
                   <div className="flex justify-start">
                     <div className="bg-muted rounded-xl p-3 flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                      <span className="text-sm text-muted-foreground">Niveshak is reviewing...</span>
+                      <Loader2 className="w-4 h-4 animate-spin text-blue-600 dark:text-blue-400" />
+                      <span className="text-sm text-muted-foreground dark:text-gray-300">Niveshak is reviewing...</span>
                     </div>
                   </div>
                 )}

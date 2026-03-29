@@ -233,7 +233,7 @@ export default function DhanPage() {
                   <Input type="number" value={formData.age} onChange={(e) => handleChange("age", e.target.value)} />
                 </div>
               </div>
-              <Button onClick={calculateHealthScore} disabled={calculating} className="w-full bg-red-600 hover:bg-red-700">
+              <Button onClick={calculateHealthScore} disabled={calculating} className="w-full bg-red-600 hover:bg-red-700 text-white">
                 {calculating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Calculating...</> : "Generate Diagnostic"}
               </Button>
             </CardContent>

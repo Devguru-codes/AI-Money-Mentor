@@ -224,7 +224,7 @@ export default function KarVidPage() {
                       <p className="text-xs text-muted-foreground">Additional ₹50,000</p>
                     </div>
                   </div>
-                  <Button onClick={calculateTax} disabled={calculating} className="w-full bg-green-600 hover:bg-green-700">
+                  <Button onClick={calculateTax} disabled={calculating} className="w-full bg-green-600 hover:bg-green-700 text-white">
                     {calculating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Calculating...</> : <><Calculator className="w-4 h-4 mr-2" /> Calculate Tax</>}
                   </Button>
                 </CardContent>

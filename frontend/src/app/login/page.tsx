@@ -7,18 +7,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Loader2, User, Mail, Phone, MessageCircle } from "lucide-react"
+import { Loader2, User, Mail, Phone, MessageCircle, Lock, Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
 
 export default function LoginPage() {
   const router = useRouter()
   const [authMode, setAuthMode] = useState<"login" | "signup">("login")
-  const [method, setMethod] = useState<"telegram" | "email">("telegram")
+  const [method, setMethod] = useState<"telegram" | "email">("email")
   const [telegramId, setTelegramId] = useState("")
   const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [name, setName] = useState("")
   const [phone, setPhone] = useState("")
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,6 +33,14 @@ export default function LoginPage() {
       toast.error("Please enter your email")
       return
     }
+    if (method === "email" && !password.trim()) {
+      toast.error("Please enter your password")
+      return
+    }
+    if (authMode === "signup" && method === "email" && password.length < 6) {
+      toast.error("Password must be at least 6 characters")
+      return
+    }
     if (authMode === "signup" && method === "email" && !name.trim()) {
       toast.error("Please enter your name")
       return
@@ -41,7 +51,10 @@ export default function LoginPage() {
       const endpoint = authMode === "login" ? "/api/auth/login" : "/api/auth/signup"
       const payload: any = {}
       if (method === "telegram") payload.telegramId = telegramId
-      if (method === "email") payload.email = email
+      if (method === "email") {
+        payload.email = email
+        payload.password = password
+      }
       if (authMode === "signup") {
         payload.name = name || (method === "telegram" ? `User_${telegramId.slice(-4)}` : email.split("@")[0])
         if (phone) payload.phone = phone
@@ -57,6 +70,10 @@ export default function LoginPage() {
       if (!response.ok) {
         if (response.status === 404 && authMode === "login") {
           toast.error("User not found. Please sign up first.")
+        } else if (response.status === 401) {
+          toast.error("Incorrect password. Please try again.")
+        } else if (response.status === 409) {
+          toast.error(data.error || "Account already exists. Please login.")
         } else {
           toast.error(data.error || "Authentication failed")
         }
@@ -128,7 +145,7 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {authMode === "signup" && (
+            {authMode === "signup" && method === "email" && (
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
                 <Input id="name" type="text" placeholder="Your full name" value={name} onChange={(e) => setName(e.target.value)} required />
@@ -152,6 +169,31 @@ export default function LoginPage() {
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input id="email" type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required />
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      id="password" 
+                      type={showPassword ? "text" : "password"} 
+                      placeholder={authMode === "signup" ? "Create a password (min 6 chars)" : "Enter your password"} 
+                      value={password} 
+                      onChange={(e) => setPassword(e.target.value)} 
+                      className="pl-10 pr-10" 
+                      required 
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setShowPassword(!showPassword)} 
+                      className="absolute right-3 top-3 h-4 w-4 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  {authMode === "signup" && (
+                    <p className="text-xs text-muted-foreground">Must be at least 6 characters</p>
+                  )}
                 </div>
                 {authMode === "signup" && (
                   <div className="space-y-2">

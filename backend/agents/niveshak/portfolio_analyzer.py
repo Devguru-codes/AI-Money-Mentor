@@ -27,6 +27,9 @@ class PortfolioAnalyzer:
         """
         if not transactions or len(transactions) < 2:
             return 0.0
+            
+        # Ensure transactions are chronologically sorted to avoid negative days
+        transactions = sorted(transactions, key=lambda x: datetime.strptime(x['date'], '%Y-%m-%d'))
         
         # Convert dates to days from first transaction
         first_date = datetime.strptime(transactions[0]['date'], '%Y-%m-%d')
@@ -36,28 +39,47 @@ class PortfolioAnalyzer:
         for t in transactions:
             date = datetime.strptime(t['date'], '%Y-%m-%d')
             day = (date - first_date).days
-            amount = t.get('amount', 0)
-            amounts.append(amount)
+            amounts.append(t.get('amount', 0))
             days.append(day)
+            
+        # Bisection search for robust convergence even in extreme negative scenarios
+        def npv(r):
+            return sum(a / ((1 + r) ** (d / 365.0)) for a, d in zip(amounts, days))
+            
+        total_cf = sum(amounts)
         
-        # Newton-Raphson method for XIRR
-        rate = 0.1  # Initial guess 10%
-        
+        if total_cf >= 0:
+            low, high = 0.0, 10000.0  # Up to 1,000,000%
+        else:
+            low, high = -0.9999, 0.0
+            
+        try:
+            npv_low = npv(low)
+            npv_high = npv(high)
+        except Exception:
+            return 0.0
+            
+        if npv_low * npv_high > 0:
+            # If function doesn't cross zero within the bounds, limit to bounds
+            return -99.99 if total_cf < 0 else 0.0
+            
         for _ in range(100):
-            npv = sum(a / ((1 + rate) ** (d / 365)) for a, d in zip(amounts, days))
-            
-            if abs(npv) < 0.01:
-                break
-            
-            # Derivative of NPV
-            dnpv = sum(-a * d / 365 / ((1 + rate) ** ((d / 365) + 1)) for a, d in zip(amounts, days) if d > 0)
-            
-            if dnpv != 0:
-                rate = rate - npv / dnpv
-            
-            rate = max(-0.99, min(rate, 10))  # Bounds
-        
-        return rate * 100  # Return as percentage
+            mid = (low + high) / 2
+            try:
+                npv_mid = npv(mid)
+            except Exception:
+                return 0.0
+                
+            if abs(npv_mid) < 0.01 or (high - low) < 1e-6:
+                return mid * 100
+                
+            if npv_mid * npv_low > 0:
+                low = mid
+                npv_low = npv_mid
+            else:
+                high = mid
+                
+        return mid * 100
     
     def calculate_cagr(self, start_value: float, end_value: float, years: float) -> float:
         """

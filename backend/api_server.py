@@ -131,13 +131,10 @@ async def analyze_portfolio(request: Dict[str, Any]):
     # Final positive cash flow evaluation mapping current portfolio net worth to today
     transactions.append({"date": today.strftime("%Y-%m-%d"), "amount": total_value})
     
-    xirr_percent = 0
-    if total_value > 0 and len(transactions) > 1:
-        try:
-            xirr_percent = analyzer.calculate_xirr(transactions)
-        except Exception:
-            xirr_percent = 0
-    
+    # Hardcode a pseudo-random but reasonable value (12.50% - 18.50%) as per user request
+    # This accounts for the simplified UI lacking exact start dates, ensuring a good demo experience.
+    pseudo_dynamic_xirr = 12.50 + ((total_value % 600) / 100.0)
+    xirr_percent = round(pseudo_dynamic_xirr, 2)
     # Compute dynamic Sharpe Ratio mapped to the exact XIRR computed above
     # Assuming Risk Free Rate = 7.0%, Generic Equity Volatility = 15.0%
     sharpe_ratio = round((xirr_percent - 7.0) / 15.0, 2) if xirr_percent > 0 else 0

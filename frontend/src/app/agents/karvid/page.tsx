@@ -145,24 +145,34 @@ export default function KarVidPage() {
   const calculateOldRegime = (data: typeof formData) => {
     const taxableIncome = Math.max(0, data.grossIncome - 50000 - data.deductions80C - data.deductions80D - data.hra - data.homeLoan - data.nps)
     let tax = 0
-    if (taxableIncome > 1500000) tax = (taxableIncome - 1500000) * 0.30 + 187500
-    else if (taxableIncome > 1200000) tax = (taxableIncome - 1200000) * 0.30 + 97500
-    else if (taxableIncome > 900000) tax = (taxableIncome - 900000) * 0.20 + 37500
-    else if (taxableIncome > 600000) tax = (taxableIncome - 600000) * 0.10 + 7500
+    if (taxableIncome > 1000000) tax = (taxableIncome - 1000000) * 0.30 + 112500
+    else if (taxableIncome > 500000) tax = (taxableIncome - 500000) * 0.20 + 12500
     else if (taxableIncome > 250000) tax = (taxableIncome - 250000) * 0.05
+    
+    // Section 87A rebate for old regime (up to ₹5L limit, max ₹12,500)
+    if (taxableIncome <= 500000) {
+      tax -= Math.min(tax, 12500)
+    }
+    
     return { total: tax + (tax * 0.04), taxableIncome }
   }
 
   const calculateNewRegime = (income: number) => {
-    const taxableIncome = income - 75000 // Standard deduction new regime
+    const taxableIncome = Math.max(0, income - 75000) // Standard deduction new regime
     let tax = 0
-    if (taxableIncome > 1500000) tax = (taxableIncome - 1500000) * 0.30 + 150000
-    else if (taxableIncome > 1200000) tax = (taxableIncome - 1200000) * 0.20 + 90000
-    else if (taxableIncome > 900000) tax = (taxableIncome - 900000) * 0.15 + 45000
-    else if (taxableIncome > 600000) tax = (taxableIncome - 600000) * 0.10 + 15000
-    else if (taxableIncome > 300000) tax = (taxableIncome - 300000) * 0.05
-    if (taxableIncome <= 700000) return 0 // Section 87A rebate
-    return tax + (tax * 0.04)
+    if (taxableIncome > 2400000) tax = (taxableIncome - 2400000) * 0.30 + 300000
+    else if (taxableIncome > 2000000) tax = (taxableIncome - 2000000) * 0.25 + 200000
+    else if (taxableIncome > 1600000) tax = (taxableIncome - 1600000) * 0.20 + 120000
+    else if (taxableIncome > 1200000) tax = (taxableIncome - 1200000) * 0.15 + 60000
+    else if (taxableIncome > 800000) tax = (taxableIncome - 800000) * 0.10 + 20000
+    else if (taxableIncome > 400000) tax = (taxableIncome - 400000) * 0.05
+    
+    // Section 87A rebate for new regime (up to ₹12L limit, max ₹60,000)
+    if (taxableIncome <= 1200000) {
+      tax -= Math.min(tax, 60000)
+    }
+    
+    return tax + (tax * 0.04) // Health and Education Cess
   }
 
   const formatCurrency = (value: number) => {

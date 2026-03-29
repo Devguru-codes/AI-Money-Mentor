@@ -159,7 +159,7 @@ print("\n--- Save Endpoints (Tax, FIRE, Health) ---")
 def test_save_tax():
     r = requests.post(f"{BASE}/api/save/tax", json={
         "userId": user_id,
-        "financialYear": "2024-25",
+        "financialYear": "2025-26",
         "regime": "new",
         "grossIncome": 1500000,
         "deductions80C": 150000,

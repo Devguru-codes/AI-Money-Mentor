@@ -84,6 +84,11 @@ def send_to_agent(agent_id: str, message: str, session_id: str = None) -> str:
     """
     session_key = f"frontend:{session_id}" if session_id else None
     
+    # Inject FY 2025-26 context for tax-related agents
+    if agent_id in ('karvid', 'dhan-sarthi'):
+        if any(kw in message.lower() for kw in ['tax', 'income', 'regime', '80c', '80d', 'deduction', 'slab', 'capital gain']):
+            message = f"[Context: Current Financial Year is FY 2025-26 (AY 2026-27). Always use FY 2025-26 tax slabs and rules.] {message}"
+
     try:
         cmd = ['openclaw', 'agent', '--agent', agent_id, '--message', message]
         if session_key:

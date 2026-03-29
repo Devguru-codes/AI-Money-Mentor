@@ -431,7 +431,7 @@ def t_chat_order():
 test("Persist", "Chat history chronological", t_chat_order)
 
 def t_tax_save():
-    r = requests.post(f"{FRONTEND}/api/save/tax", json={"userId": user_id, "financialYear": "2024-25", "regime": "new", "grossIncome": 1500000, "deductions80C": 150000, "deductions80D": 25000, "taxPayable": 195000}, timeout=10)
+    r = requests.post(f"{FRONTEND}/api/save/tax", json={"userId": user_id, "financialYear": "2025-26", "regime": "new", "grossIncome": 1500000, "deductions80C": 150000, "deductions80D": 25000, "taxPayable": 195000}, timeout=10)
     return r.status_code == 201, "Tax saved"
 test("Persist", "Tax profile save", t_tax_save)
 

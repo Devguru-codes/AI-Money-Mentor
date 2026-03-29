@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     const taxProfile = await prisma.taxProfile.create({
       data: {
         userId,
-        financialYear: financialYear || '2024-25',
+        financialYear: financialYear || '2025-26',
         regime: regime || 'new',
         grossIncome: grossIncome || 0,
         deductions80C: deductions80C || 0,

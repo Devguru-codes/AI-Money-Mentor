@@ -35,7 +35,7 @@ export default function KarVidPage() {
 
   // AI Chat state
   const [messages, setMessages] = useState<Message[]>([{
-    id: "init", role: "assistant", content: "I am KarVid, your AI Tax Advisor. Input your numbers in the form to generate a unified tax breakdown, or ask me directly about tax sections, exemptions, and capital gains!"
+    id: "init", role: "assistant", content: "I am KarVid, your AI Tax Advisor for FY 2025-26 (AY 2026-27). Input your numbers in the form to generate a unified tax breakdown, or ask me directly about tax sections, exemptions, and capital gains!"
   }])
   const [chatInput, setChatInput] = useState("")
   const [chatLoading, setChatLoading] = useState(false)
